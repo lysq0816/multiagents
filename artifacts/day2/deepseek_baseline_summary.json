@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-08-10T08:32:00Z",
+  "provider": "deepseek",
+  "agent_model": "deepseek/deepseek-v4-flash",
+  "user_model": "deepseek/deepseek-v4-flash",
+  "evaluator_model": "deepseek/deepseek-v4-flash",
+  "mode": "compatible_combined",
+  "source_results": [
+    "artifacts/day2/llm_baseline_results_compatible.json",
+    "artifacts/day2/llm_baseline_results_recovery_v2.json"
+  ],
+  "combination_rule": "Use the six non-infrastructure-error simulations from the compatible run and tasks 38, 70, 108 from recovery_v2.",
+  "task_count": 9,
+  "passed": 8,
+  "failed": 1,
+  "pass_rate": 0.8889,
+  "failed_task_ids": [
+    "38"
+  ],
+  "usage": {
+    "prompt_tokens": 645466,
+    "completion_tokens": 33276,
+    "total_tokens": 678742,
+    "recorded_cost_usd": 0.02095387,
+    "duration_seconds": 314.88
+  },
+  "task_results": [
+    {"task_id": "38", "reward": 0.0, "source": "recovery_v2"},
+    {"task_id": "70", "reward": 1.0, "source": "recovery_v2"},
+    {"task_id": "73", "reward": 1.0, "source": "compatible"},
+    {"task_id": "75", "reward": 1.0, "source": "compatible"},
+    {"task_id": "80", "reward": 1.0, "source": "compatible"},
+    {"task_id": "83", "reward": 1.0, "source": "compatible"},
+    {"task_id": "88", "reward": 1.0, "source": "compatible"},
+    {"task_id": "90", "reward": 1.0, "source": "compatible"},
+    {"task_id": "108", "reward": 1.0, "source": "recovery_v2"}
+  ],
+  "strict_protocol_diagnostic": {
+    "source": "artifacts/day2/llm_baseline_results_strict.json",
+    "passed": 2,
+    "task_count": 9,
+    "note": "Seven tasks terminated because DeepSeek returned text and tool calls in the same message. This result is retained as a protocol compatibility diagnostic."
+  },
+  "caveats": [
+    "Recorded usage and cost cover only the nine simulations selected into the combined result.",
+    "Strict-mode runs, infrastructure-error retries, and API preflight calls are excluded; provider billing is authoritative."
+  ]
+}

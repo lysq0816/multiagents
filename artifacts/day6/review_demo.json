@@ -1,0 +1,781 @@
+{
+  "generated_at": "2026-08-12T15:22:29.226459+00:00",
+  "model_calls": 0,
+  "write_tool_calls": 0,
+  "after_snapshot_is_simulated": true,
+  "tool_permissions": {
+    "planner": [],
+    "auditor": []
+  },
+  "summary": {
+    "planning_status": "ready_for_review",
+    "audit_status": "awaiting_human_decision",
+    "audit_checks": {
+      "plan_gate": "passed",
+      "entity": "passed",
+      "action_order": "passed",
+      "evidence": "passed",
+      "policy": "passed",
+      "precondition": "passed"
+    },
+    "human_decision": "approve",
+    "execution_authorized": true,
+    "can_execute_now": false,
+    "write_executed": false,
+    "simulated_state_verification": "matched"
+  },
+  "planning": {
+    "specialist_results": [
+      {
+        "order_handoff": {
+          "schema_version": "1.0",
+          "handoff_type": "order_facts",
+          "handoff_id": "demo-review-1:order-to-policy:cancel_order:#W9348897",
+          "case_id": "demo-review-1",
+          "sender": "order_specialist",
+          "recipient": "policy_specialist",
+          "payload": {
+            "case_id": "demo-review-1",
+            "action_type": "cancel_order",
+            "order_id": "#W9348897",
+            "facts": [
+              {
+                "fact_id": "fact:demo-review-1:user.authenticated",
+                "field": "user.authenticated",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "tool",
+                "source_id": "source:demo-review-1:user.authenticated",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224612Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:action.details_presented",
+                "field": "action.details_presented",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "agent",
+                "source_id": "source:demo-review-1:action.details_presented",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224627Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:user.confirmed",
+                "field": "user.confirmed",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:user.confirmed",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224633Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:order.id_confirmed",
+                "field": "order.id_confirmed",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:order.id_confirmed",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224636Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:cancel.reason",
+                "field": "cancel.reason",
+                "value": "no longer needed",
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:cancel.reason",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224640Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:order-status",
+                "field": "order.status",
+                "value": "pending",
+                "subject_id": "#W9348897",
+                "source_type": "tool",
+                "source_id": "get_order_details:call-1",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224728Z"
+              }
+            ],
+            "tool_calls": [
+              {
+                "call_id": "get_order_details:call-1",
+                "actor": "order_specialist",
+                "tool_name": "get_order_details",
+                "arguments": {
+                  "order_id": "#W9348897"
+                }
+              }
+            ]
+          },
+          "created_at": "2026-08-12T15:22:29.224739Z"
+        },
+        "policy_handoff": {
+          "schema_version": "1.0",
+          "handoff_type": "policy_decision",
+          "handoff_id": "demo-review-1:policy-to-planner:cancel_order:#W9348897",
+          "case_id": "demo-review-1",
+          "sender": "policy_specialist",
+          "recipient": "planner",
+          "payload": {
+            "case_id": "demo-review-1",
+            "action_type": "cancel_order",
+            "order_id": "#W9348897",
+            "facts": [
+              {
+                "fact_id": "fact:demo-review-1:user.authenticated",
+                "field": "user.authenticated",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "tool",
+                "source_id": "source:demo-review-1:user.authenticated",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224612Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:action.details_presented",
+                "field": "action.details_presented",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "agent",
+                "source_id": "source:demo-review-1:action.details_presented",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224627Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:user.confirmed",
+                "field": "user.confirmed",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:user.confirmed",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224633Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:order.id_confirmed",
+                "field": "order.id_confirmed",
+                "value": true,
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:order.id_confirmed",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224636Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:cancel.reason",
+                "field": "cancel.reason",
+                "value": "no longer needed",
+                "subject_id": "#W9348897",
+                "source_type": "user",
+                "source_id": "source:demo-review-1:cancel.reason",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224640Z"
+              },
+              {
+                "fact_id": "fact:demo-review-1:order-status",
+                "field": "order.status",
+                "value": "pending",
+                "subject_id": "#W9348897",
+                "source_type": "tool",
+                "source_id": "get_order_details:call-1",
+                "derived_from_source_ids": [],
+                "observed_at": "2026-08-12T15:22:29.224728Z"
+              }
+            ],
+            "retrieved_policy": [
+              {
+                "score": 36.0,
+                "match_reasons": [
+                  "intent",
+                  "action",
+                  "tag",
+                  "text"
+                ],
+                "clause": {
+                  "clause_id": "retail.cancel.pending_only",
+                  "title": "Only pending orders may be cancelled",
+                  "text": "An order can only be cancelled if its status is 'pending', and you should check its status before taking the action.",
+                  "source_section": "Cancel pending order",
+                  "applies_to_intents": [
+                    "cancel_order"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order"
+                  ],
+                  "tags": [
+                    "cancel",
+                    "pending",
+                    "order status",
+                    "取消订单",
+                    "待处理",
+                    "订单状态"
+                  ]
+                }
+              },
+              {
+                "score": 30.0,
+                "match_reasons": [
+                  "intent",
+                  "action",
+                  "text"
+                ],
+                "clause": {
+                  "clause_id": "retail.cancel.reason",
+                  "title": "Confirm order ID and an allowed cancellation reason",
+                  "text": "The user needs to confirm the order id and the reason (either 'no longer needed' or 'ordered by mistake') for cancellation. Other reasons are not acceptable.",
+                  "source_section": "Cancel pending order",
+                  "applies_to_intents": [
+                    "cancel_order"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order"
+                  ],
+                  "tags": [
+                    "cancel reason",
+                    "order id",
+                    "no longer needed",
+                    "ordered by mistake",
+                    "取消理由",
+                    "订单号"
+                  ]
+                }
+              },
+              {
+                "score": 26.0,
+                "match_reasons": [
+                  "intent",
+                  "action",
+                  "text"
+                ],
+                "clause": {
+                  "clause_id": "retail.cancel.refund",
+                  "title": "Cancellation status and refund timing",
+                  "text": "After user confirmation, the order status will be changed to 'cancelled', and the total will be refunded via the original payment method immediately if it is gift card, otherwise in 5 to 7 business days.",
+                  "source_section": "Cancel pending order",
+                  "applies_to_intents": [
+                    "cancel_order"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order"
+                  ],
+                  "tags": [
+                    "cancelled",
+                    "refund",
+                    "gift card",
+                    "5 to 7 business days",
+                    "退款",
+                    "退款时效"
+                  ]
+                }
+              },
+              {
+                "score": 26.0,
+                "match_reasons": [
+                  "intent",
+                  "action",
+                  "text"
+                ],
+                "clause": {
+                  "clause_id": "retail.write.explicit_confirmation",
+                  "title": "Present details and obtain explicit confirmation",
+                  "text": "Before taking any action that updates the database (cancel, modify, return, exchange), you must list the action details and obtain explicit user confirmation (yes) to proceed.",
+                  "source_section": "Retail agent policy",
+                  "applies_to_intents": [
+                    "cancel_order",
+                    "return_items",
+                    "exchange_items"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order",
+                    "create_return",
+                    "exchange_items"
+                  ],
+                  "tags": [
+                    "confirmation",
+                    "yes",
+                    "write action",
+                    "用户确认",
+                    "明确确认",
+                    "写操作"
+                  ]
+                }
+              },
+              {
+                "score": 24.0,
+                "match_reasons": [
+                  "intent",
+                  "action"
+                ],
+                "clause": {
+                  "clause_id": "retail.general.no_fabrication",
+                  "title": "Do not invent information or procedures",
+                  "text": "You should not make up any information or knowledge or procedures not provided by the user or the tools, or give subjective recommendations or comments.",
+                  "source_section": "Retail agent policy",
+                  "applies_to_intents": [
+                    "cancel_order",
+                    "return_items",
+                    "exchange_items"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order",
+                    "create_return",
+                    "exchange_items"
+                  ],
+                  "tags": [
+                    "grounding",
+                    "evidence",
+                    "no fabrication",
+                    "禁止编造",
+                    "证据",
+                    "来源"
+                  ]
+                }
+              },
+              {
+                "score": 24.0,
+                "match_reasons": [
+                  "intent",
+                  "action"
+                ],
+                "clause": {
+                  "clause_id": "retail.identity.authentication",
+                  "title": "Authenticate before account assistance",
+                  "text": "At the beginning of the conversation, you have to authenticate the user identity by locating their user id via email, or via name + zip code. This has to be done even when the user already provides the user id.",
+                  "source_section": "Retail agent policy",
+                  "applies_to_intents": [
+                    "cancel_order",
+                    "return_items",
+                    "exchange_items"
+                  ],
+                  "applies_to_actions": [
+                    "cancel_order",
+                    "create_return",
+                    "exchange_items"
+                  ],
+                  "tags": [
+                    "authentication",
+                    "identity",
+                    "email",
+                    "name zip",
+                    "身份验证",
+                    "用户认证"
+                  ]
+                }
+              }
+            ],
+            "decision": {
+              "action_type": "cancel_order",
+              "status": "eligible",
+              "checks": [
+                {
+                  "requirement_id": "common.authentication",
+                  "description": "The user was authenticated through an allowed lookup.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:user.authenticated"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.identity.authentication"
+                  ]
+                },
+                {
+                  "requirement_id": "common.action_details",
+                  "description": "The action details were presented before the write action.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:action.details_presented"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.write.explicit_confirmation"
+                  ]
+                },
+                {
+                  "requirement_id": "common.explicit_confirmation",
+                  "description": "The user explicitly confirmed the write action.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:user.confirmed"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.write.explicit_confirmation"
+                  ]
+                },
+                {
+                  "requirement_id": "cancel.pending_status",
+                  "description": "The order status is pending.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:order-status"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.cancel.pending_only"
+                  ]
+                },
+                {
+                  "requirement_id": "cancel.order_id_confirmed",
+                  "description": "The user confirmed the order ID.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:order.id_confirmed"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.cancel.reason"
+                  ]
+                },
+                {
+                  "requirement_id": "cancel.allowed_reason",
+                  "description": "The cancellation reason is allowed by policy.",
+                  "status": "passed",
+                  "fact_ids": [
+                    "fact:demo-review-1:cancel.reason"
+                  ],
+                  "policy_clause_ids": [
+                    "retail.cancel.reason"
+                  ]
+                }
+              ],
+              "missing_fact_fields": [],
+              "conclusion": {
+                "statement": "All cited requirements passed; the action is eligible for planning.",
+                "fact_ids": [
+                  "fact:demo-review-1:user.authenticated",
+                  "fact:demo-review-1:action.details_presented",
+                  "fact:demo-review-1:user.confirmed",
+                  "fact:demo-review-1:order-status",
+                  "fact:demo-review-1:order.id_confirmed",
+                  "fact:demo-review-1:cancel.reason"
+                ],
+                "policy_clause_ids": [
+                  "retail.identity.authentication",
+                  "retail.write.explicit_confirmation",
+                  "retail.cancel.pending_only",
+                  "retail.cancel.reason"
+                ]
+              }
+            }
+          },
+          "created_at": "2026-08-12T15:22:29.225102Z"
+        }
+      }
+    ],
+    "plan": {
+      "case_id": "demo-review-1",
+      "status": "ready_for_review",
+      "candidate_actions": [
+        {
+          "plan_id": "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897",
+          "sequence": 1,
+          "case_id": "demo-review-1",
+          "source_handoff_ids": [
+            "demo-review-1:policy-to-planner:cancel_order:#W9348897"
+          ],
+          "action_type": "cancel_order",
+          "order_id": "#W9348897",
+          "item_ids": [],
+          "target_item_ids": [],
+          "arguments": {
+            "reason": "no longer needed"
+          },
+          "fact_ids": [
+            "fact:demo-review-1:user.authenticated",
+            "fact:demo-review-1:action.details_presented",
+            "fact:demo-review-1:user.confirmed",
+            "fact:demo-review-1:order-status",
+            "fact:demo-review-1:order.id_confirmed",
+            "fact:demo-review-1:cancel.reason"
+          ],
+          "policy_clause_ids": [
+            "retail.identity.authentication",
+            "retail.write.explicit_confirmation",
+            "retail.cancel.pending_only",
+            "retail.cancel.reason"
+          ],
+          "requires_approval": true,
+          "can_execute": false
+        }
+      ],
+      "issues": [],
+      "clarification_questions": [],
+      "can_advance_to_review": true,
+      "can_execute": false
+    }
+  },
+  "audit": {
+    "review_id": "review:demo-review-1:294b4946c8c9",
+    "case_id": "demo-review-1",
+    "actor": "auditor",
+    "plan_digest": "294b4946c8c9a4784718c3a26b12c84f6163185da8ddbedab3cf10971d5d8e25",
+    "status": "awaiting_human_decision",
+    "checks": [
+      {
+        "check_id": "audit:plan-gate",
+        "check_type": "plan_gate",
+        "status": "passed",
+        "description": "The planner marked the conflict-free plan ready for independent review.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "check_id": "audit:entities",
+        "check_type": "entity",
+        "status": "passed",
+        "description": "Every action has the required order and item entities.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "check_id": "audit:action-order",
+        "check_type": "action_order",
+        "status": "passed",
+        "description": "Action sequence numbers are unique and contiguous, with one write per order.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "check_id": "audit:evidence",
+        "check_type": "evidence",
+        "status": "passed",
+        "description": "Every action has unique fact and policy citations.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "check_id": "audit:policy",
+        "check_type": "policy",
+        "status": "passed",
+        "description": "Every action cites all mandatory policy clauses.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "check_id": "audit:preconditions",
+        "check_type": "precondition",
+        "status": "passed",
+        "description": "Every action has the exact write-tool arguments required by its type.",
+        "plan_ids": [
+          "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ]
+      }
+    ],
+    "reviewed_actions": [
+      {
+        "plan_id": "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897",
+        "sequence": 1,
+        "case_id": "demo-review-1",
+        "source_handoff_ids": [
+          "demo-review-1:policy-to-planner:cancel_order:#W9348897"
+        ],
+        "action_type": "cancel_order",
+        "order_id": "#W9348897",
+        "item_ids": [],
+        "target_item_ids": [],
+        "arguments": {
+          "reason": "no longer needed"
+        },
+        "fact_ids": [
+          "fact:demo-review-1:user.authenticated",
+          "fact:demo-review-1:action.details_presented",
+          "fact:demo-review-1:user.confirmed",
+          "fact:demo-review-1:order-status",
+          "fact:demo-review-1:order.id_confirmed",
+          "fact:demo-review-1:cancel.reason"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication",
+          "retail.write.explicit_confirmation",
+          "retail.cancel.pending_only",
+          "retail.cancel.reason"
+        ],
+        "requires_approval": true,
+        "can_execute": false
+      }
+    ],
+    "expected_state_changes": [
+      {
+        "order_id": "#W9348897",
+        "expected_status": "cancelled",
+        "expected_fields": {
+          "cancel_reason": "no longer needed"
+        }
+      }
+    ],
+    "can_request_human_decision": true,
+    "can_execute": false,
+    "reviewed_at": "2026-08-12T15:22:29.225909Z"
+  },
+  "approval": {
+    "decision_id": "decision:review:demo-review-1:294b4946c8c9:approve",
+    "case_id": "demo-review-1",
+    "decision": "approve",
+    "status": "approved",
+    "decided_by": "demo-operator",
+    "reason": "Demo approval after checking facts, policy, entities, and arguments.",
+    "authorization": {
+      "authorization_id": "authorization:review:demo-review-1:294b4946c8c9",
+      "review_id": "review:demo-review-1:294b4946c8c9",
+      "case_id": "demo-review-1",
+      "plan_digest": "294b4946c8c9a4784718c3a26b12c84f6163185da8ddbedab3cf10971d5d8e25",
+      "approved_plan_ids": [
+        "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897"
+      ],
+      "approved_actions": [
+        {
+          "plan_id": "plan:demo-review-1:policy-to-planner:cancel_order:#W9348897",
+          "sequence": 1,
+          "case_id": "demo-review-1",
+          "source_handoff_ids": [
+            "demo-review-1:policy-to-planner:cancel_order:#W9348897"
+          ],
+          "action_type": "cancel_order",
+          "order_id": "#W9348897",
+          "item_ids": [],
+          "target_item_ids": [],
+          "arguments": {
+            "reason": "no longer needed"
+          },
+          "fact_ids": [
+            "fact:demo-review-1:user.authenticated",
+            "fact:demo-review-1:action.details_presented",
+            "fact:demo-review-1:user.confirmed",
+            "fact:demo-review-1:order-status",
+            "fact:demo-review-1:order.id_confirmed",
+            "fact:demo-review-1:cancel.reason"
+          ],
+          "policy_clause_ids": [
+            "retail.identity.authentication",
+            "retail.write.explicit_confirmation",
+            "retail.cancel.pending_only",
+            "retail.cancel.reason"
+          ],
+          "requires_approval": true,
+          "can_execute": false
+        }
+      ],
+      "expected_state_changes": [
+        {
+          "order_id": "#W9348897",
+          "expected_status": "cancelled",
+          "expected_fields": {
+            "cancel_reason": "no longer needed"
+          }
+        }
+      ],
+      "approved_by": "demo-operator",
+      "single_use": true,
+      "authorizes_execution": true,
+      "write_executed": false,
+      "issued_at": "2026-08-12T15:22:29.226419Z"
+    },
+    "revised_actions": [],
+    "requires_re_review": false,
+    "execution_authorized": true,
+    "can_execute_now": false,
+    "write_executed": false,
+    "decided_at": "2026-08-12T15:22:29.226436Z"
+  },
+  "simulated_after_snapshot": {
+    "order_id": "#W9348897",
+    "status": "cancelled",
+    "cancel_reason": "no longer needed"
+  },
+  "verification": {
+    "verification_id": "verification:authorization:review:demo-review-1:294b4946c8c9",
+    "authorization_id": "authorization:review:demo-review-1:294b4946c8c9",
+    "status": "matched",
+    "differences": [],
+    "verified_at": "2026-08-12T15:22:29.226457Z"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-10T12:14:01Z",
+  "provider": "deepseek",
+  "model": "deepseek/deepseek-v4-flash",
+  "reporting_status": "diagnostic_only_not_a_benchmark_score",
+  "authoritative_official_baseline": {
+    "source": "artifacts/day2/deepseek_baseline_summary.json",
+    "task_count": 9,
+    "passed": 8,
+    "failed": 1,
+    "pass_rate": 0.8889,
+    "failed_task_ids": ["38"]
+  },
+  "task_38_non_official_diagnostic": {
+    "evaluation_profile": "retail_action_compatibility_v2",
+    "diagnostic_source": "artifacts/day2/business_evaluation_task_38.json",
+    "source": "artifacts/day2/llm_baseline_results_task38_business_fix.json",
+    "official_reward": 0.0,
+    "diagnostic_business_reward": 1.0,
+    "calculation_compatibility_applied": true,
+    "reason_compatibility_applied": true
+  },
+  "reporting_rule": "Only the official 8/9 result is reported as benchmark performance. The task-38 business value is retained solely for root-cause analysis.",
+  "caveats": [
+    "The local business diagnostic is not an official τ2 score and is not included in pass rate.",
+    "The task-38 rerun used a prompt adjustment and is not an official-prompt baseline run.",
+    "Calculator compatibility requires the complete gold addend multiset, a successful calculate tool response, and the correct total.",
+    "Cancellation-reason compatibility applies only when the scenario did not specify a reason and the selected reason is allowed by Retail policy.",
+    "LiteLLM did not map DeepSeek V4 Flash pricing; the DeepSeek console is authoritative for billing."
+  ]
+}

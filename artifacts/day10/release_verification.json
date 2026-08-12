@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-08-12T15:22:31.920935+00:00",
+  "passed": true,
+  "offline": true,
+  "model_calls": 0,
+  "write_tool_calls": 0,
+  "static_checks": {
+    "api_version": "0.6.0",
+    "required_api_paths_present": true,
+    "missing_api_paths": [],
+    "policy_clause_count": 14,
+    "dockerfile_present": true,
+    "compose_present": true,
+    "readme_present": true,
+    "development_log_present": true,
+    "operator_ui_present": true,
+    "deterministic_demo_script_count": 6,
+    "day8_experiment_report_present": true,
+    "day8_task_count": 30,
+    "day8_architecture_count": 4,
+    "day8_repetitions_per_task": 3,
+    "day8_total_run_count": 360,
+    "day8_real_write_operations": 0,
+    "docker_runtime_validated": false,
+    "docker_runtime_note": "Docker CLI is optional for offline release checks; run `docker compose config` on a Docker-enabled host."
+  },
+  "commands": [
+    {
+      "command": [
+        "uv",
+        "run",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "return_code": 0,
+      "passed": true,
+      "stdout": "........................................................................ [ 68%]\n.................................                                        [100%]\n105 passed in 0.81s",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "ruff",
+        "check",
+        "."
+      ],
+      "return_code": 0,
+      "passed": true,
+      "stdout": "All checks passed!",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "return_code": 0,
+      "passed": true,
+      "stdout": "84 files already formatted",
+      "stderr": ""
+    }
+  ]
+}

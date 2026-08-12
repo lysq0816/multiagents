@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "task_id": "90",
+    "intent": "cancel",
+    "mode": "reference_action_smoke",
+    "uses_evaluation_reference_actions": true,
+    "comparable_to_llm_baseline": false
+  },
+  "user_scenario": {
+    "persona": null,
+    "instructions": {
+      "domain": "retail",
+      "reason_for_call": "You want to know if the digital camera you just bought is 10x zoom. If not, modify the item to 10x zoom without changing the other options. If 10x zoom is not available, cancel the order with the reason of no longer needed. If it is available but the price is more than 3000, cancel the order with the reason of ordered by mistake.",
+      "known_info": "You name is Emma Kovacs and your email is emma.kovacs2974@example.com.",
+      "unknown_info": null,
+      "task_instructions": "You are polite, curious, flexible, relaxing, yet impatient."
+    }
+  },
+  "tool_events": [
+    {
+      "sequence": 0,
+      "requestor": "assistant",
+      "tool_name": "cancel_pending_order",
+      "arguments": {
+        "order_id": "#W9284598",
+        "reason": "ordered by mistake"
+      },
+      "response": "{\"order_id\": \"#W9284598\", \"user_id\": \"emma_kovacs_9839\", \"address\": {\"address1\": \"637 Pine Lane\", \"address2\": \"Suite 443\", \"city\": \"Jacksonville\", \"country\": \"USA\", \"state\": \"FL\", \"zip\": \"32190\"}, \"items\": [{\"name\": \"Cycling Helmet\", \"product_id\": \"7765186836\", \"item_id\": \"3264130640\", \"price\": 211.41, \"options\": {\"size\": \"M\", \"color\": \"black\", \"ventilation\": \"medium\"}}, {\"name\": \"Water Bottle\", \"product_id\": \"8310926033\", \"item_id\": \"1434748144\", \"price\": 49.72, \"options\": {\"capacity\": \"1000ml\", \"material\": \"glass\", \"color\": \"red\"}}, {\"name\": \"Digital Camera\", \"product_id\": \"8940227892\", \"item_id\": \"7195021808\", \"price\": 2909.87, \"options\": {\"resolution\": \"30MP\", \"zoom\": \"5x\", \"storage\": \"SD card\"}}, {\"name\": \"Dumbbell Set\", \"product_id\": \"7233192239\", \"item_id\": \"3877338112\", \"price\": 545.68, \"options\": {\"weight range\": \"5-25 lbs\", \"material\": \"iron\", \"set type\": \"adjustable\"}}, {\"name\": \"Cycling Helmet\", \"product_id\": \"7765186836\", \"item_id\": \"7811981098\", \"price\": 213.86, \"options\": {\"size\": \"S\", \"color\": \"white\", \"ventilation\": \"medium\"}}], \"status\": \"cancelled\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 3930.54, \"payment_method_id\": \"credit_card_7239357\"}, {\"transaction_type\": \"refund\", \"amount\": 3930.54, \"payment_method_id\": \"credit_card_7239357\"}], \"cancel_reason\": \"ordered by mistake\", \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "error": false,
+      "latency_seconds": 0.000224
+    }
+  ],
+  "final_state": {
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "c01984ba9743cde5dfd0f047505140ed7bb45246f2f0bf13585ea9e028081aa6",
+    "official_db_match": true
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "You name is Emma Kovacs and your email is emma.kovacs2974@example.com.\nYou want to know if the digital camera you just bought is 10x zoom. If not, modify the item to 10x zoom without changing the other options. If 10x zoom is not available, cancel the order with the reason of no longer needed. If it is available but the price is more than 3000, cancel the order with the reason of ordered by mistake.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.057195",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "reference-smoke-90-0",
+          "name": "cancel_pending_order",
+          "arguments": {
+            "order_id": "#W9284598",
+            "reason": "ordered by mistake"
+          },
+          "requestor": "assistant"
+        }
+      ],
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.057195",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "id": "reference-smoke-90-0",
+      "role": "tool",
+      "content": "{\"order_id\": \"#W9284598\", \"user_id\": \"emma_kovacs_9839\", \"address\": {\"address1\": \"637 Pine Lane\", \"address2\": \"Suite 443\", \"city\": \"Jacksonville\", \"country\": \"USA\", \"state\": \"FL\", \"zip\": \"32190\"}, \"items\": [{\"name\": \"Cycling Helmet\", \"product_id\": \"7765186836\", \"item_id\": \"3264130640\", \"price\": 211.41, \"options\": {\"size\": \"M\", \"color\": \"black\", \"ventilation\": \"medium\"}}, {\"name\": \"Water Bottle\", \"product_id\": \"8310926033\", \"item_id\": \"1434748144\", \"price\": 49.72, \"options\": {\"capacity\": \"1000ml\", \"material\": \"glass\", \"color\": \"red\"}}, {\"name\": \"Digital Camera\", \"product_id\": \"8940227892\", \"item_id\": \"7195021808\", \"price\": 2909.87, \"options\": {\"resolution\": \"30MP\", \"zoom\": \"5x\", \"storage\": \"SD card\"}}, {\"name\": \"Dumbbell Set\", \"product_id\": \"7233192239\", \"item_id\": \"3877338112\", \"price\": 545.68, \"options\": {\"weight range\": \"5-25 lbs\", \"material\": \"iron\", \"set type\": \"adjustable\"}}, {\"name\": \"Cycling Helmet\", \"product_id\": \"7765186836\", \"item_id\": \"7811981098\", \"price\": 213.86, \"options\": {\"size\": \"S\", \"color\": \"white\", \"ventilation\": \"medium\"}}], \"status\": \"cancelled\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 3930.54, \"payment_method_id\": \"credit_card_7239357\"}, {\"transaction_type\": \"refund\", \"amount\": 3930.54, \"payment_method_id\": \"credit_card_7239357\"}], \"cancel_reason\": \"ordered by mistake\", \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "requestor": "assistant",
+      "error": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.057195"
+    },
+    {
+      "role": "assistant",
+      "content": "Reference-action smoke run completed; this is not a model response.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.057195",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    }
+  ],
+  "metrics": {
+    "task_id": "90",
+    "intent": "cancel",
+    "passed": true,
+    "environment_reward": 1.0,
+    "db_match": true,
+    "tool_call_count": 1,
+    "tool_error_count": 0,
+    "latency_seconds": 0.139288,
+    "agent_model_calls": 0,
+    "agent_tokens": null,
+    "agent_cost": 0.0,
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "c01984ba9743cde5dfd0f047505140ed7bb45246f2f0bf13585ea9e028081aa6",
+    "started_at": "2026-08-09T12:37:30.020795+00:00",
+    "finished_at": "2026-08-09T12:37:30.178269+00:00"
+  }
+}

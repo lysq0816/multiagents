@@ -1,0 +1,144 @@
+{
+  "benchmark": "tau2",
+  "benchmark_version": "1.0.1",
+  "domain": "retail",
+  "manifest_name": "retail_day2_core_v1",
+  "official_root": "D:\\llm项目\\多智能体协作\\.external\\tau2-bench-main",
+  "task_count": 9,
+  "counts_by_intent": {
+    "cancel": 3,
+    "return": 3,
+    "exchange": 3
+  },
+  "tasks": [
+    {
+      "task_id": "38",
+      "intent": "cancel",
+      "split": "test",
+      "reason_for_call": "You just placed an order but you realize that your card has only $950 credit left, but the order total is more than $1100. You wonder if the agent can help split the payment with another card. If not, you wonder what the most expensive item and its price, and if you can just cancel that item. If not, you wonder if you can switch all items to their cheapest options and bring the cost down to $950. If not, you wonder if the agent can just cancel the order so that you can order again.",
+      "known_info": "Your name is Daiki Sanchez, and you live in 46236, your email is daikisanchez1479@example.com.",
+      "action_names": [
+        "find_user_id_by_email",
+        "find_user_id_by_name_zip",
+        "calculate",
+        "cancel_pending_order"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "88",
+      "intent": "cancel",
+      "split": "train",
+      "reason_for_call": "You want to change the book shelf to 4 foot but with the same material and color. If it is not available, cancel the whole order and you will buy again. If the agent asks for the cancellation reason, you say you ordered by mistake.",
+      "known_info": "You name is Daiki Silva and your email is daiki.silva6295@example.com.",
+      "action_names": [
+        "cancel_pending_order"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "90",
+      "intent": "cancel",
+      "split": "test",
+      "reason_for_call": "You want to know if the digital camera you just bought is 10x zoom. If not, modify the item to 10x zoom without changing the other options. If 10x zoom is not available, cancel the order with the reason of no longer needed. If it is available but the price is more than 3000, cancel the order with the reason of ordered by mistake.",
+      "known_info": "You name is Emma Kovacs and your email is emma.kovacs2974@example.com.",
+      "action_names": [
+        "cancel_pending_order"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "73",
+      "intent": "return",
+      "split": "train",
+      "reason_for_call": "You want to return everything you just bought except the coffee machine.",
+      "known_info": "You name is Fatima Wilson and your email is fatima.wilson5721@example.com.",
+      "action_names": [
+        "return_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "83",
+      "intent": "return",
+      "split": "train",
+      "reason_for_call": "You received two tablets and you only need one. You want to return the more expensive one and refund to credit card. If refund to credit card is not possible, you become angry and refund to GC.",
+      "known_info": "You name is Chen Silva and your zip code is 46281.",
+      "action_names": [
+        "return_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "108",
+      "intent": "return",
+      "split": "test",
+      "reason_for_call": "You want to return everything but a tablet in a recently delivered order. There is an E-Reader in the order that you want to return.",
+      "known_info": "You name is Yusuf Gonzalez and your zip code is 91455.",
+      "action_names": [
+        "return_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "70",
+      "intent": "exchange",
+      "split": "test",
+      "reason_for_call": "You recently received a helmet but you are not happy with it and want to exchange. The size is too small and you want medium, plus you want high ventilation. If multiple colors are available, you prefer blue. You do not want the  You prefer original payment to pay for the price difference, and you want to know how much you need to pay today.",
+      "known_info": "You name is Sofia Hernandez and your zip code is 98193.",
+      "action_names": [
+        "exchange_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "75",
+      "intent": "exchange",
+      "split": "train",
+      "reason_for_call": "For #W6908222, you want to exchange Wireless Earbuds {'color': 'blue', 'battery life': '8 hours', 'water resistance': 'IPX4'} to one with the following attributes: {'color': 'black', 'battery life': '4 hours', 'water resistance': 'not resistant'}",
+      "known_info": "You name is Liam Moore and your email is liam.moore6985@example.com.",
+      "action_names": [
+        "exchange_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    },
+    {
+      "task_id": "80",
+      "intent": "exchange",
+      "split": "train",
+      "reason_for_call": "For #W7209932, exchange T-Shirt {'color': 'blue', 'size': 'S', 'material': 'polyester', 'style': 'v-neck'} to {'color': 'red', 'size': 'XXL', 'material': 'cotton', 'style': 'crew neck'}; Use the gift card.",
+      "known_info": "You name is Amelia Gonzalez and your email is amelia.gonzalez4271@example.com.",
+      "action_names": [
+        "exchange_delivered_order_items"
+      ],
+      "reward_basis": [
+        "DB",
+        "NL_ASSERTION"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "retail_day2_core_v1",
+  "source": "Official tau2-bench 1.0.1 Retail task set",
+  "selection_policy": "Nine base-split tasks: three cancellations, three returns, and three exchanges; mixed train/test membership; exactly one consequential reference write per task.",
+  "tasks": [
+    {
+      "task_id": "38",
+      "intent": "cancel",
+      "split": "test",
+      "note": "Cancel the whole order after unsupported payment splitting and item-level alternatives fail."
+    },
+    {
+      "task_id": "88",
+      "intent": "cancel",
+      "split": "train",
+      "note": "Cancel the whole order when the requested bookshelf variant is unavailable."
+    },
+    {
+      "task_id": "90",
+      "intent": "cancel",
+      "split": "test",
+      "note": "Cancel a camera order after checking zoom availability and price constraints."
+    },
+    {
+      "task_id": "73",
+      "intent": "return",
+      "split": "train",
+      "note": "Return every delivered item except the coffee machine."
+    },
+    {
+      "task_id": "83",
+      "intent": "return",
+      "split": "train",
+      "note": "Return the more expensive tablet using the accepted fallback refund method."
+    },
+    {
+      "task_id": "108",
+      "intent": "return",
+      "split": "test",
+      "note": "Return all delivered items except a tablet."
+    },
+    {
+      "task_id": "70",
+      "intent": "exchange",
+      "split": "test",
+      "note": "Exchange a helmet using size, ventilation, color, and payment preferences."
+    },
+    {
+      "task_id": "75",
+      "intent": "exchange",
+      "split": "train",
+      "note": "Exchange explicitly identified earbuds for a requested attribute combination."
+    },
+    {
+      "task_id": "80",
+      "intent": "exchange",
+      "split": "train",
+      "note": "Exchange an explicitly identified T-shirt and use a gift card."
+    }
+  ]
+}

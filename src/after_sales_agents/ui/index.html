@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="电商售后多智能体协作与人工审批工作台">
+  <title>售后协作控制台</title>
+  <link rel="stylesheet" href="/ui/assets/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#workspace">跳到工作区</a>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">协</span>
+      <div>
+        <p class="eyebrow">AFTER-SALES CONTROL ROOM</p>
+        <h1>售后协作控制台</h1>
+      </div>
+    </div>
+    <div class="safety-badge" role="status">
+      <span class="pulse" aria-hidden="true"></span>
+      安全演示 · 无真实写操作
+    </div>
+  </header>
+
+  <main id="workspace" class="workspace">
+    <section class="hero panel">
+      <div>
+        <p class="eyebrow">人工在环 · 事实可追溯 · 政策有引用</p>
+        <h2>一屏看清每个智能体为什么这样判断</h2>
+        <p class="lead">选择一个示例工单，系统将读取快照、检索政策、生成候选动作并独立审核。批准只生成授权，不会执行取消、退货或换货。</p>
+      </div>
+      <div class="hero-metrics" aria-label="安全指标">
+        <div><strong id="model-call-count">0</strong><span>模型调用</span></div>
+        <div><strong id="write-call-count">0</strong><span>写工具调用</span></div>
+        <div><strong>100%</strong><span>证据可追溯</span></div>
+      </div>
+    </section>
+
+    <section class="control-strip panel" aria-labelledby="case-control-title">
+      <div>
+        <p class="eyebrow" id="case-control-title">演示工单</p>
+        <div class="case-picker" role="group" aria-label="选择业务场景">
+          <button class="scenario-button is-active" type="button" data-scenario="cancel">取消订单</button>
+          <button class="scenario-button" type="button" data-scenario="return">商品退货</button>
+          <button class="scenario-button" type="button" data-scenario="exchange">商品换货</button>
+        </div>
+      </div>
+      <button id="run-workflow" class="primary-button" type="button">运行多智能体分析</button>
+    </section>
+
+    <section class="summary-grid" aria-label="工单摘要">
+      <article class="summary-card panel">
+        <span>工单</span><strong id="case-id">CASE-UI-CANCEL</strong><small id="intent-label">未发货订单取消</small>
+      </article>
+      <article class="summary-card panel">
+        <span>订单</span><strong id="order-id">#W9348897</strong><small id="order-status">pending · 待处理</small>
+      </article>
+      <article class="summary-card panel">
+        <span>规划状态</span><strong id="plan-status" class="status-text idle">待运行</strong><small id="risk-label">等待事实与政策审查</small>
+      </article>
+      <article class="summary-card panel">
+        <span>执行状态</span><strong class="status-text safe">未执行</strong><small>写工具始终为 0 次</small>
+      </article>
+    </section>
+
+    <section class="main-grid">
+      <div class="primary-column">
+        <article class="panel conversation-card">
+          <div class="section-heading">
+            <div><p class="eyebrow">TICKET CONVERSATION</p><h2>工单对话</h2></div>
+            <span class="tag">用户确认已记录</span>
+          </div>
+          <div id="conversation" class="conversation" aria-live="polite"></div>
+        </article>
+
+        <article class="panel timeline-card">
+          <div class="section-heading">
+            <div><p class="eyebrow">COLLABORATION TRACE</p><h2>智能体协作时间线</h2></div>
+            <span id="timeline-state" class="tag muted">尚未开始</span>
+          </div>
+          <ol id="timeline" class="timeline"></ol>
+        </article>
+
+        <article class="panel action-card">
+          <div class="section-heading">
+            <div><p class="eyebrow">CANDIDATE ACTION</p><h2>拟执行动作与风险</h2></div>
+            <span class="tag warning">需人工审批</span>
+          </div>
+          <div id="candidate-actions" class="empty-state">运行分析后显示候选动作。</div>
+          <div id="planning-issues" class="issue-list"></div>
+        </article>
+
+        <article class="panel review-card">
+          <div class="section-heading">
+            <div><p class="eyebrow">INDEPENDENT AUDIT</p><h2>独立审核检查</h2></div>
+            <span id="audit-state" class="tag muted">等待规划</span>
+          </div>
+          <div id="audit-checks" class="check-grid"><div class="empty-state">候选动作生成后才能审核。</div></div>
+        </article>
+      </div>
+
+      <aside class="secondary-column">
+        <article class="panel evidence-card">
+          <div class="section-heading compact">
+            <div><p class="eyebrow">ORDER EVIDENCE</p><h2>订单事实证据</h2></div>
+          </div>
+          <div id="fact-evidence" class="evidence-list"><div class="empty-state">等待智能体读取订单快照。</div></div>
+        </article>
+
+        <article class="panel evidence-card">
+          <div class="section-heading compact">
+            <div><p class="eyebrow">POLICY EVIDENCE</p><h2>政策引用</h2></div>
+          </div>
+          <div id="policy-evidence" class="evidence-list"><div class="empty-state">等待政策智能体检索条款。</div></div>
+        </article>
+
+        <article class="panel decision-card">
+          <div class="section-heading compact">
+            <div><p class="eyebrow">HUMAN GATE</p><h2>人工审批</h2></div>
+          </div>
+          <label for="operator-name">操作员</label>
+          <input id="operator-name" value="operator-ui" autocomplete="off">
+          <label for="decision-reason">决定理由</label>
+          <textarea id="decision-reason" rows="3">已核对订单、事实来源、政策条款和操作参数。</textarea>
+          <label for="modification-reason">修改后的取消理由</label>
+          <select id="modification-reason">
+            <option value="ordered by mistake">ordered by mistake</option>
+            <option value="no longer needed">no longer needed</option>
+          </select>
+          <div class="decision-buttons">
+            <button type="button" class="approve-button" data-decision="approve" disabled>批准</button>
+            <button type="button" class="modify-button" data-decision="modify" disabled>修改</button>
+            <button type="button" class="reject-button" data-decision="reject" disabled>拒绝</button>
+          </div>
+          <p class="safety-copy">批准只签发绑定计划摘要的单次授权。这个页面没有执行按钮，也没有调用写工具的接口。</p>
+          <div id="decision-result" class="decision-result" aria-live="polite">等待审核通过。</div>
+        </article>
+
+        <article class="panel diff-card">
+          <div class="section-heading compact">
+            <div><p class="eyebrow">STATE DIFFERENCE</p><h2>状态差异</h2></div>
+            <span class="tag muted">模拟快照</span>
+          </div>
+          <div id="state-diff" class="diff-view"><div class="empty-state">批准后可验证一份明确标记为模拟的状态快照。</div></div>
+          <button id="verify-state" class="secondary-button" type="button" disabled>验证模拟状态</button>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/ui/assets/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "task_id": "73",
+    "intent": "return",
+    "mode": "reference_action_smoke",
+    "uses_evaluation_reference_actions": true,
+    "comparable_to_llm_baseline": false
+  },
+  "user_scenario": {
+    "persona": null,
+    "instructions": {
+      "domain": "retail",
+      "reason_for_call": "You want to return everything you just bought except the coffee machine.",
+      "known_info": "You name is Fatima Wilson and your email is fatima.wilson5721@example.com.",
+      "unknown_info": null,
+      "task_instructions": "You are polite, flexible, creative."
+    }
+  },
+  "tool_events": [
+    {
+      "sequence": 0,
+      "requestor": "assistant",
+      "tool_name": "return_delivered_order_items",
+      "arguments": {
+        "order_id": "#W5272531",
+        "item_ids": [
+          "7228247242",
+          "2698416822",
+          "8098621301",
+          "3320557165"
+        ],
+        "payment_method_id": "credit_card_6824399"
+      },
+      "response": "{\"order_id\": \"#W5272531\", \"user_id\": \"fatima_wilson_7472\", \"address\": {\"address1\": \"167 Willow Lane\", \"address2\": \"Suite 624\", \"city\": \"San Diego\", \"country\": \"USA\", \"state\": \"CA\", \"zip\": \"92183\"}, \"items\": [{\"name\": \"Electric Toothbrush\", \"product_id\": \"7352963235\", \"item_id\": \"3320557165\", \"price\": 188.67, \"options\": {\"color\": \"blue\", \"speed settings\": \"high\", \"battery type\": \"AA batteries\"}}, {\"name\": \"Electric Kettle\", \"product_id\": \"1075968781\", \"item_id\": \"2698416822\", \"price\": 149.45, \"options\": {\"capacity\": \"1.5L\", \"material\": \"plastic\", \"color\": \"white\"}}, {\"name\": \"Electric Toothbrush\", \"product_id\": \"7352963235\", \"item_id\": \"8098621301\", \"price\": 192.15, \"options\": {\"color\": \"black\", \"speed settings\": \"high\", \"battery type\": \"rechargeable\"}}, {\"name\": \"Hiking Boots\", \"product_id\": \"7363354090\", \"item_id\": \"7228247242\", \"price\": 251.38, \"options\": {\"size\": \"10\", \"material\": \"leather\", \"waterproof\": \"yes\"}}, {\"name\": \"Espresso Machine\", \"product_id\": \"4354588079\", \"item_id\": \"7441167885\", \"price\": 2866.37, \"options\": {\"pressure\": \"15 bar\", \"capacity\": \"1.5L\", \"type\": \"capsule\"}}], \"status\": \"return requested\", \"fulfillments\": [{\"tracking_id\": [\"848454071657\"], \"item_ids\": [\"3320557165\", \"2698416822\", \"8098621301\", \"7228247242\", \"7441167885\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 3648.02, \"payment_method_id\": \"credit_card_6824399\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": [\"2698416822\", \"3320557165\", \"7228247242\", \"8098621301\"], \"return_payment_method_id\": \"credit_card_6824399\"}",
+      "error": false,
+      "latency_seconds": 0.000172
+    }
+  ],
+  "final_state": {
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "3fda1284264c991619412a152ef862ca2c9bd7ef4ad697266605f57755adbece",
+    "official_db_match": true
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "You name is Fatima Wilson and your email is fatima.wilson5721@example.com.\nYou want to return everything you just bought except the coffee machine.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.287504",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "reference-smoke-73-0",
+          "name": "return_delivered_order_items",
+          "arguments": {
+            "order_id": "#W5272531",
+            "item_ids": [
+              "7228247242",
+              "2698416822",
+              "8098621301",
+              "3320557165"
+            ],
+            "payment_method_id": "credit_card_6824399"
+          },
+          "requestor": "assistant"
+        }
+      ],
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.287504",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "id": "reference-smoke-73-0",
+      "role": "tool",
+      "content": "{\"order_id\": \"#W5272531\", \"user_id\": \"fatima_wilson_7472\", \"address\": {\"address1\": \"167 Willow Lane\", \"address2\": \"Suite 624\", \"city\": \"San Diego\", \"country\": \"USA\", \"state\": \"CA\", \"zip\": \"92183\"}, \"items\": [{\"name\": \"Electric Toothbrush\", \"product_id\": \"7352963235\", \"item_id\": \"3320557165\", \"price\": 188.67, \"options\": {\"color\": \"blue\", \"speed settings\": \"high\", \"battery type\": \"AA batteries\"}}, {\"name\": \"Electric Kettle\", \"product_id\": \"1075968781\", \"item_id\": \"2698416822\", \"price\": 149.45, \"options\": {\"capacity\": \"1.5L\", \"material\": \"plastic\", \"color\": \"white\"}}, {\"name\": \"Electric Toothbrush\", \"product_id\": \"7352963235\", \"item_id\": \"8098621301\", \"price\": 192.15, \"options\": {\"color\": \"black\", \"speed settings\": \"high\", \"battery type\": \"rechargeable\"}}, {\"name\": \"Hiking Boots\", \"product_id\": \"7363354090\", \"item_id\": \"7228247242\", \"price\": 251.38, \"options\": {\"size\": \"10\", \"material\": \"leather\", \"waterproof\": \"yes\"}}, {\"name\": \"Espresso Machine\", \"product_id\": \"4354588079\", \"item_id\": \"7441167885\", \"price\": 2866.37, \"options\": {\"pressure\": \"15 bar\", \"capacity\": \"1.5L\", \"type\": \"capsule\"}}], \"status\": \"return requested\", \"fulfillments\": [{\"tracking_id\": [\"848454071657\"], \"item_ids\": [\"3320557165\", \"2698416822\", \"8098621301\", \"7228247242\", \"7441167885\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 3648.02, \"payment_method_id\": \"credit_card_6824399\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": [\"2698416822\", \"3320557165\", \"7228247242\", \"8098621301\"], \"return_payment_method_id\": \"credit_card_6824399\"}",
+      "requestor": "assistant",
+      "error": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.287504"
+    },
+    {
+      "role": "assistant",
+      "content": "Reference-action smoke run completed; this is not a model response.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:30.287504",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    }
+  ],
+  "metrics": {
+    "task_id": "73",
+    "intent": "return",
+    "passed": true,
+    "environment_reward": 1.0,
+    "db_match": true,
+    "tool_call_count": 1,
+    "tool_error_count": 0,
+    "latency_seconds": 0.183262,
+    "agent_model_calls": 0,
+    "agent_tokens": null,
+    "agent_cost": 0.0,
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "3fda1284264c991619412a152ef862ca2c9bd7ef4ad697266605f57755adbece",
+    "started_at": "2026-08-09T12:37:30.196486+00:00",
+    "finished_at": "2026-08-09T12:37:30.396568+00:00"
+  }
+}

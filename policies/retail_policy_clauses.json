@@ -1,0 +1,134 @@
+{
+  "catalog_id": "tau2-retail-1.0.1-mvp",
+  "benchmark_version": "1.0.1",
+  "domain": "retail",
+  "source_path": "data/tau2/domains/retail/policy.md",
+  "clauses": [
+    {
+      "clause_id": "retail.identity.authentication",
+      "title": "Authenticate before account assistance",
+      "text": "At the beginning of the conversation, you have to authenticate the user identity by locating their user id via email, or via name + zip code. This has to be done even when the user already provides the user id.",
+      "source_section": "Retail agent policy",
+      "applies_to_intents": ["cancel_order", "return_items", "exchange_items"],
+      "applies_to_actions": ["cancel_order", "create_return", "exchange_items"],
+      "tags": ["authentication", "identity", "email", "name zip", "身份验证", "用户认证"]
+    },
+    {
+      "clause_id": "retail.write.explicit_confirmation",
+      "title": "Present details and obtain explicit confirmation",
+      "text": "Before taking any action that updates the database (cancel, modify, return, exchange), you must list the action details and obtain explicit user confirmation (yes) to proceed.",
+      "source_section": "Retail agent policy",
+      "applies_to_intents": ["cancel_order", "return_items", "exchange_items"],
+      "applies_to_actions": ["cancel_order", "create_return", "exchange_items"],
+      "tags": ["confirmation", "yes", "write action", "用户确认", "明确确认", "写操作"]
+    },
+    {
+      "clause_id": "retail.general.no_fabrication",
+      "title": "Do not invent information or procedures",
+      "text": "You should not make up any information or knowledge or procedures not provided by the user or the tools, or give subjective recommendations or comments.",
+      "source_section": "Retail agent policy",
+      "applies_to_intents": ["cancel_order", "return_items", "exchange_items"],
+      "applies_to_actions": ["cancel_order", "create_return", "exchange_items"],
+      "tags": ["grounding", "evidence", "no fabrication", "禁止编造", "证据", "来源"]
+    },
+    {
+      "clause_id": "retail.cancel.pending_only",
+      "title": "Only pending orders may be cancelled",
+      "text": "An order can only be cancelled if its status is 'pending', and you should check its status before taking the action.",
+      "source_section": "Cancel pending order",
+      "applies_to_intents": ["cancel_order"],
+      "applies_to_actions": ["cancel_order"],
+      "tags": ["cancel", "pending", "order status", "取消订单", "待处理", "订单状态"]
+    },
+    {
+      "clause_id": "retail.cancel.reason",
+      "title": "Confirm order ID and an allowed cancellation reason",
+      "text": "The user needs to confirm the order id and the reason (either 'no longer needed' or 'ordered by mistake') for cancellation. Other reasons are not acceptable.",
+      "source_section": "Cancel pending order",
+      "applies_to_intents": ["cancel_order"],
+      "applies_to_actions": ["cancel_order"],
+      "tags": ["cancel reason", "order id", "no longer needed", "ordered by mistake", "取消理由", "订单号"]
+    },
+    {
+      "clause_id": "retail.cancel.refund",
+      "title": "Cancellation status and refund timing",
+      "text": "After user confirmation, the order status will be changed to 'cancelled', and the total will be refunded via the original payment method immediately if it is gift card, otherwise in 5 to 7 business days.",
+      "source_section": "Cancel pending order",
+      "applies_to_intents": ["cancel_order"],
+      "applies_to_actions": ["cancel_order"],
+      "tags": ["cancelled", "refund", "gift card", "5 to 7 business days", "退款", "退款时效"]
+    },
+    {
+      "clause_id": "retail.return.delivered_only",
+      "title": "Only delivered orders may be returned",
+      "text": "An order can only be returned if its status is 'delivered', and you should check its status before taking the action.",
+      "source_section": "Return delivered order",
+      "applies_to_intents": ["return_items"],
+      "applies_to_actions": ["create_return"],
+      "tags": ["return", "delivered", "order status", "退货", "已送达", "订单状态"]
+    },
+    {
+      "clause_id": "retail.return.confirm_items",
+      "title": "Confirm the return order and item list",
+      "text": "The user needs to confirm the order id and the list of items to be returned.",
+      "source_section": "Return delivered order",
+      "applies_to_intents": ["return_items"],
+      "applies_to_actions": ["create_return"],
+      "tags": ["return items", "order id", "item list", "退货商品", "订单号", "商品清单"]
+    },
+    {
+      "clause_id": "retail.return.refund_method",
+      "title": "Return refund method restrictions",
+      "text": "The user needs to provide a payment method to receive the refund.\n\nThe refund must either go to the original payment method, or an existing gift card.",
+      "source_section": "Return delivered order",
+      "applies_to_intents": ["return_items"],
+      "applies_to_actions": ["create_return"],
+      "tags": ["refund method", "original payment", "gift card", "退款方式", "原支付方式", "礼品卡"]
+    },
+    {
+      "clause_id": "retail.return.outcome",
+      "title": "Return request outcome",
+      "text": "After user confirmation, the order status will be changed to 'return requested', and the user will receive an email regarding how to return items.",
+      "source_section": "Return delivered order",
+      "applies_to_intents": ["return_items"],
+      "applies_to_actions": ["create_return"],
+      "tags": ["return requested", "email", "return instructions", "退货申请", "邮件"]
+    },
+    {
+      "clause_id": "retail.exchange.delivered_only",
+      "title": "Only delivered orders may be exchanged",
+      "text": "An order can only be exchanged if its status is 'delivered', and you should check its status before taking the action. In particular, remember to remind the customer to confirm they have provided all items to be exchanged.",
+      "source_section": "Exchange delivered order",
+      "applies_to_intents": ["exchange_items"],
+      "applies_to_actions": ["exchange_items"],
+      "tags": ["exchange", "delivered", "all items", "换货", "已送达", "全部商品"]
+    },
+    {
+      "clause_id": "retail.exchange.same_product_available",
+      "title": "Exchange only to an available variant of the same product",
+      "text": "For a delivered order, each item can be exchanged to an available new item of the same product but of different product option. There cannot be any change of product types, e.g. modify shirt to shoe.",
+      "source_section": "Exchange delivered order",
+      "applies_to_intents": ["exchange_items"],
+      "applies_to_actions": ["exchange_items"],
+      "tags": ["same product", "available", "different option", "换货商品", "同一产品", "有库存", "不同选项"]
+    },
+    {
+      "clause_id": "retail.exchange.payment",
+      "title": "Exchange price-difference payment requirements",
+      "text": "The user must provide a payment method to pay or receive refund of the price difference. If the user provides a gift card, it must have enough balance to cover the price difference.",
+      "source_section": "Exchange delivered order",
+      "applies_to_intents": ["exchange_items"],
+      "applies_to_actions": ["exchange_items"],
+      "tags": ["price difference", "payment method", "gift card balance", "差价", "支付方式", "礼品卡余额"]
+    },
+    {
+      "clause_id": "retail.exchange.outcome",
+      "title": "Exchange request outcome",
+      "text": "After user confirmation, the order status will be changed to 'exchange requested', and the user will receive an email regarding how to return items. There is no need to place a new order.",
+      "source_section": "Exchange delivered order",
+      "applies_to_intents": ["exchange_items"],
+      "applies_to_actions": ["exchange_items"],
+      "tags": ["exchange requested", "email", "no new order", "换货申请", "邮件", "无需新订单"]
+    }
+  ]
+}

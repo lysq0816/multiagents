@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "task_id": "80",
+    "intent": "exchange",
+    "mode": "reference_action_smoke",
+    "uses_evaluation_reference_actions": true,
+    "comparable_to_llm_baseline": false
+  },
+  "user_scenario": {
+    "persona": null,
+    "instructions": {
+      "domain": "retail",
+      "reason_for_call": "For #W7209932, exchange T-Shirt {'color': 'blue', 'size': 'S', 'material': 'polyester', 'style': 'v-neck'} to {'color': 'red', 'size': 'XXL', 'material': 'cotton', 'style': 'crew neck'}; Use the gift card.",
+      "known_info": "You name is Amelia Gonzalez and your email is amelia.gonzalez4271@example.com.",
+      "unknown_info": null,
+      "task_instructions": "You are curious, patient, outgoing.  Try to make the conversation as confusing for the agent as possible."
+    }
+  },
+  "tool_events": [
+    {
+      "sequence": 0,
+      "requestor": "assistant",
+      "tool_name": "exchange_delivered_order_items",
+      "arguments": {
+        "order_id": "#W7209932",
+        "item_ids": [
+          "5047954489"
+        ],
+        "new_item_ids": [
+          "9354168549"
+        ],
+        "payment_method_id": "gift_card_2611937"
+      },
+      "response": "{\"order_id\": \"#W7209932\", \"user_id\": \"amelia_gonzalez_4098\", \"address\": {\"address1\": \"722 Sunset Drive\", \"address2\": \"Suite 670\", \"city\": \"Denver\", \"country\": \"USA\", \"state\": \"CO\", \"zip\": \"80245\"}, \"items\": [{\"name\": \"T-Shirt\", \"product_id\": \"9523456873\", \"item_id\": \"5047954489\", \"price\": 54.84, \"options\": {\"color\": \"blue\", \"size\": \"S\", \"material\": \"polyester\", \"style\": \"v-neck\"}}, {\"name\": \"Backpack\", \"product_id\": \"2524789262\", \"item_id\": \"5917587651\", \"price\": 212.79, \"options\": {\"color\": \"grey\", \"size\": \"medium\", \"material\": \"polyester\", \"compartment\": \"laptop\"}}], \"status\": \"exchange requested\", \"fulfillments\": [{\"tracking_id\": [\"699530851768\"], \"item_ids\": [\"5047954489\", \"5917587651\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 267.63, \"payment_method_id\": \"gift_card_2611937\"}], \"cancel_reason\": null, \"exchange_items\": [\"5047954489\"], \"exchange_new_items\": [\"9354168549\"], \"exchange_payment_method_id\": \"gift_card_2611937\", \"exchange_price_difference\": -7.99, \"return_items\": null, \"return_payment_method_id\": null}",
+      "error": false,
+      "latency_seconds": 0.00015
+    }
+  ],
+  "final_state": {
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "2eb374bb67d50bb3052610fd856815e900c4226ed0509e8ecfc9553f727e6a18",
+    "official_db_match": true
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "You name is Amelia Gonzalez and your email is amelia.gonzalez4271@example.com.\nFor #W7209932, exchange T-Shirt {'color': 'blue', 'size': 'S', 'material': 'polyester', 'style': 'v-neck'} to {'color': 'red', 'size': 'XXL', 'material': 'cotton', 'style': 'crew neck'}; Use the gift card.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:31.178053",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "reference-smoke-80-0",
+          "name": "exchange_delivered_order_items",
+          "arguments": {
+            "order_id": "#W7209932",
+            "item_ids": [
+              "5047954489"
+            ],
+            "new_item_ids": [
+              "9354168549"
+            ],
+            "payment_method_id": "gift_card_2611937"
+          },
+          "requestor": "assistant"
+        }
+      ],
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:31.178053",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    },
+    {
+      "id": "reference-smoke-80-0",
+      "role": "tool",
+      "content": "{\"order_id\": \"#W7209932\", \"user_id\": \"amelia_gonzalez_4098\", \"address\": {\"address1\": \"722 Sunset Drive\", \"address2\": \"Suite 670\", \"city\": \"Denver\", \"country\": \"USA\", \"state\": \"CO\", \"zip\": \"80245\"}, \"items\": [{\"name\": \"T-Shirt\", \"product_id\": \"9523456873\", \"item_id\": \"5047954489\", \"price\": 54.84, \"options\": {\"color\": \"blue\", \"size\": \"S\", \"material\": \"polyester\", \"style\": \"v-neck\"}}, {\"name\": \"Backpack\", \"product_id\": \"2524789262\", \"item_id\": \"5917587651\", \"price\": 212.79, \"options\": {\"color\": \"grey\", \"size\": \"medium\", \"material\": \"polyester\", \"compartment\": \"laptop\"}}], \"status\": \"exchange requested\", \"fulfillments\": [{\"tracking_id\": [\"699530851768\"], \"item_ids\": [\"5047954489\", \"5917587651\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 267.63, \"payment_method_id\": \"gift_card_2611937\"}], \"cancel_reason\": null, \"exchange_items\": [\"5047954489\"], \"exchange_new_items\": [\"9354168549\"], \"exchange_payment_method_id\": \"gift_card_2611937\", \"exchange_price_difference\": -7.99, \"return_items\": null, \"return_payment_method_id\": null}",
+      "requestor": "assistant",
+      "error": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:31.178053"
+    },
+    {
+      "role": "assistant",
+      "content": "Reference-action smoke run completed; this is not a model response.",
+      "tool_calls": null,
+      "is_audio": false,
+      "turn_idx": null,
+      "timestamp": "2026-08-09T20:37:31.178053",
+      "cost": null,
+      "usage": null,
+      "raw_data": null,
+      "generation_time_seconds": null,
+      "audio_format": null,
+      "audio_path": null,
+      "audio_script_gold": null,
+      "speech_effects": null,
+      "source_effects": null,
+      "channel_effects": null,
+      "turn_taking_action": null,
+      "utterance_ids": null,
+      "chunk_id": null,
+      "is_final_chunk": true,
+      "source": null,
+      "contains_speech": true
+    }
+  ],
+  "metrics": {
+    "task_id": "80",
+    "intent": "exchange",
+    "passed": true,
+    "environment_reward": 1.0,
+    "db_match": true,
+    "tool_call_count": 1,
+    "tool_error_count": 0,
+    "latency_seconds": 0.138943,
+    "agent_model_calls": 0,
+    "agent_tokens": null,
+    "agent_cost": 0.0,
+    "initial_db_hash": "b25c9cb211f5efcaee5dd646054a73c4a9f43f4f5acc32c10713cd9f9ac20e9c",
+    "final_db_hash": "2eb374bb67d50bb3052610fd856815e900c4226ed0509e8ecfc9553f727e6a18",
+    "started_at": "2026-08-09T12:37:31.135603+00:00",
+    "finished_at": "2026-08-09T12:37:31.293140+00:00"
+  }
+}

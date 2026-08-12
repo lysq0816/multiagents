@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-08-12T15:22:29.939923+00:00",
+  "offline": true,
+  "model_calls": 0,
+  "write_tool_calls": 0,
+  "scenario_count": 5,
+  "scenarios": {
+    "cancel_ready": {
+      "planning_status": "ready_for_review",
+      "candidate_count": 1,
+      "issue_types": [],
+      "clarification_questions": [],
+      "audit_status": "awaiting_human_decision",
+      "can_request_human_decision": true,
+      "can_execute": false
+    },
+    "return_ready": {
+      "planning_status": "ready_for_review",
+      "candidate_count": 1,
+      "issue_types": [],
+      "clarification_questions": [],
+      "audit_status": "awaiting_human_decision",
+      "can_request_human_decision": true,
+      "can_execute": false
+    },
+    "exchange_ready": {
+      "planning_status": "ready_for_review",
+      "candidate_count": 1,
+      "issue_types": [],
+      "clarification_questions": [],
+      "audit_status": "awaiting_human_decision",
+      "can_request_human_decision": true,
+      "can_execute": false
+    },
+    "missing_confirmation": {
+      "planning_status": "needs_clarification",
+      "candidate_count": 0,
+      "issue_types": [
+        "missing_information"
+      ],
+      "clarification_questions": [
+        "Please provide or verify the required field: user.confirmed."
+      ],
+      "audit_status": "rejected_by_auditor",
+      "can_request_human_decision": false,
+      "can_execute": false
+    },
+    "return_exchange_item_conflict": {
+      "planning_status": "blocked",
+      "candidate_count": 2,
+      "issue_types": [
+        "item"
+      ],
+      "clarification_questions": [],
+      "audit_status": "rejected_by_auditor",
+      "can_request_human_decision": false,
+      "can_execute": false
+    }
+  }
+}

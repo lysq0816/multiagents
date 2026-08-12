@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-08-10T13:11:11.499785+00:00",
+  "catalog_id": "tau2-retail-1.0.1-mvp",
+  "official_policy": "D:\\llm项目\\多智能体协作\\.external\\tau2-bench-main\\data\\tau2\\domains\\retail\\policy.md",
+  "clause_count": 14,
+  "validated_clause_ids": [
+    "retail.identity.authentication",
+    "retail.write.explicit_confirmation",
+    "retail.general.no_fabrication",
+    "retail.cancel.pending_only",
+    "retail.cancel.reason",
+    "retail.cancel.refund",
+    "retail.return.delivered_only",
+    "retail.return.confirm_items",
+    "retail.return.refund_method",
+    "retail.return.outcome",
+    "retail.exchange.delivered_only",
+    "retail.exchange.same_product_available",
+    "retail.exchange.payment",
+    "retail.exchange.outcome"
+  ],
+  "search_hit_ids": [
+    "retail.cancel.pending_only",
+    "retail.cancel.reason",
+    "retail.cancel.refund",
+    "retail.general.no_fabrication",
+    "retail.identity.authentication",
+    "retail.write.explicit_confirmation"
+  ],
+  "sample_decision": {
+    "action_type": "cancel_order",
+    "status": "eligible",
+    "checks": [
+      {
+        "requirement_id": "common.authentication",
+        "description": "The user was authenticated through an allowed lookup.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:authenticated"
+        ],
+        "policy_clause_ids": [
+          "retail.identity.authentication"
+        ]
+      },
+      {
+        "requirement_id": "common.action_details",
+        "description": "The action details were presented before the write action.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:details"
+        ],
+        "policy_clause_ids": [
+          "retail.write.explicit_confirmation"
+        ]
+      },
+      {
+        "requirement_id": "common.explicit_confirmation",
+        "description": "The user explicitly confirmed the write action.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:confirmed"
+        ],
+        "policy_clause_ids": [
+          "retail.write.explicit_confirmation"
+        ]
+      },
+      {
+        "requirement_id": "cancel.pending_status",
+        "description": "The order status is pending.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:status"
+        ],
+        "policy_clause_ids": [
+          "retail.cancel.pending_only"
+        ]
+      },
+      {
+        "requirement_id": "cancel.order_id_confirmed",
+        "description": "The user confirmed the order ID.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:order-id"
+        ],
+        "policy_clause_ids": [
+          "retail.cancel.reason"
+        ]
+      },
+      {
+        "requirement_id": "cancel.allowed_reason",
+        "description": "The cancellation reason is allowed by policy.",
+        "status": "passed",
+        "fact_ids": [
+          "fact:reason"
+        ],
+        "policy_clause_ids": [
+          "retail.cancel.reason"
+        ]
+      }
+    ],
+    "missing_fact_fields": [],
+    "conclusion": {
+      "statement": "All cited requirements passed; the action is eligible for planning.",
+      "fact_ids": [
+        "fact:authenticated",
+        "fact:details",
+        "fact:confirmed",
+        "fact:status",
+        "fact:order-id",
+        "fact:reason"
+      ],
+      "policy_clause_ids": [
+        "retail.identity.authentication",
+        "retail.write.explicit_confirmation",
+        "retail.cancel.pending_only",
+        "retail.cancel.reason"
+      ]
+    }
+  },
+  "model_calls": 0
+}
