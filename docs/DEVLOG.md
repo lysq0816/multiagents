@@ -92,6 +92,41 @@ OK
 
 ---
 
+## 2026-08-12｜首次发布到 GitHub
+
+### 本次目标
+
+将本地项目安全地初始化提交并推送到用户创建的 GitHub 仓库。
+
+### 已完成
+
+1. 确认仓库此前没有提交、远程地址和 Git 提交身份；
+2. 对 136 个候选文件做体积与敏感字符串检查，总体积约 3.65 MB；
+3. 确认 `local_secrets.py`、对应字节码、`.env`、虚拟环境和外部依赖均被 Git 忽略；
+4. 暂存后再次检查，没有敏感路径进入索引；
+5. 仅为当前仓库配置 GitHub 用户名和 GitHub 隐私提交邮箱；
+6. 创建首次提交 `4f8fc6c`，提交说明为
+   `Initial commit: retail after-sales multi-agent MVP`；
+7. 将本地分支从 `master` 改为 `main`；
+8. 配置远程仓库 `https://github.com/lysq0816/multiagents.git`；
+9. 通过 Git Credential Manager 的用户授权完成首次推送；
+10. 比较本地与远程提交哈希，确认 `origin/main` 与本地 `main` 完全一致。
+
+### 安全结果
+
+```text
+tracked local_secrets.py: false
+tracked local secret bytecode: false
+tracked .env: false
+API/GitHub token pattern matches before commit: 0
+```
+
+### 远程地址
+
+`https://github.com/lysq0816/multiagents`
+
+---
+
 ## 2026-08-10｜第 3 天：政策检索与事实绑定
 
 ### 本次目标
