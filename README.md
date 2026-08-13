@@ -27,6 +27,8 @@
 
 第 2 天完成内容、结果含义和测试方式见
 [docs/DAY2_GUIDE.md](docs/DAY2_GUIDE.md)。
+官方 Retail `base` split 114 题单轮结果、续跑过程和提交口径见
+[docs/TAU2_FULL_RETAIL_REPORT.md](docs/TAU2_FULL_RETAIL_REPORT.md)。
 
 第 3 天政策条款、检索和事实绑定说明见
 [docs/DAY3_GUIDE.md](docs/DAY3_GUIDE.md)。
@@ -141,7 +143,10 @@ python scripts\run_tau2_llm_baseline.py
 }
 ```
 
-官方基准的唯一主成绩为 `8/9`。任务 38 的本地等价性分析不参与通过率计算。
+早期固定 9 题官方基准成绩为 `8/9`。2026-08-13 完成的 Retail `base`
+全部 114 题单轮成绩为 `108/114`（Pass¹ `94.74%`），0 缺题、0 重复、0 基础设施
+错误。这是完整 Retail 单轮成绩，不是τ2全领域 Overall，也不是官方强烈建议的
+4+ trials 提交成绩。任务 38 的本地等价性分析不参与通过率计算。
 如需查看历史诊断，可以显式运行：
 
 ```powershell

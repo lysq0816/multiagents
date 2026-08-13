@@ -40,10 +40,11 @@ def build_command(
     user_model: str,
     save_to: str,
     num_trials: int,
-    task_ids: list[str],
+    task_ids: list[str] | None,
     enforce_communication_protocol: bool,
+    auto_resume: bool = False,
 ) -> list[str]:
-    """Build a deterministic official CLI command for the fixed subset."""
+    """Build a deterministic official CLI command for a subset or the full base split."""
 
     command = [
         str(_tau2_python(tau2_root)),
@@ -65,8 +66,6 @@ def build_command(
         '{"temperature": 0.0}',
         "--task-split-name",
         "base",
-        "--task-ids",
-        *task_ids,
         "--num-trials",
         str(num_trials),
         "--max-concurrency",
@@ -81,9 +80,64 @@ def build_command(
         save_to,
         "--verbose-logs",
     ]
+    if task_ids is not None:
+        split_index = command.index("--num-trials")
+        command[split_index:split_index] = ["--task-ids", *task_ids]
     if enforce_communication_protocol:
         command.append("--enforce-communication-protocol")
+    if auto_resume:
+        command.append("--auto-resume")
     return command
+
+
+def assess_result_completeness(
+    source_payload: dict[str, object],
+    *,
+    expected_simulation_count: int,
+) -> tuple[int, list[dict[str, object]]]:
+    """Return the result count and entries that prevent a complete official run."""
+
+    simulations = source_payload.get("simulations", [])
+    if not isinstance(simulations, list):
+        return 0, [{"reason": "simulations_not_a_list"}]
+
+    incomplete_simulations = []
+    run_keys: set[tuple[object, object]] = set()
+    for simulation in simulations:
+        if not isinstance(simulation, dict):
+            incomplete_simulations.append({"reason": "simulation_not_an_object"})
+            continue
+        run_key = (simulation.get("task_id"), simulation.get("trial"))
+        if run_key in run_keys:
+            incomplete_simulations.append(
+                {
+                    "reason": "duplicate_task_trial",
+                    "task_id": run_key[0],
+                    "trial": run_key[1],
+                }
+            )
+        run_keys.add(run_key)
+        reward_info = simulation.get("reward_info")
+        reward = reward_info.get("reward") if isinstance(reward_info, dict) else None
+        termination_reason = simulation.get("termination_reason")
+        if reward is None or termination_reason == "infrastructure_error":
+            incomplete_simulations.append(
+                {
+                    "task_id": simulation.get("task_id"),
+                    "trial": simulation.get("trial"),
+                    "termination_reason": termination_reason,
+                }
+            )
+
+    if len(simulations) != expected_simulation_count:
+        incomplete_simulations.append(
+            {
+                "reason": "unexpected_simulation_count",
+                "expected": expected_simulation_count,
+                "actual": len(simulations),
+            }
+        )
+    return len(simulations), incomplete_simulations
 
 
 def main() -> int:
@@ -98,6 +152,14 @@ def main() -> int:
     )
     parser.add_argument("--num-trials", type=int, default=1)
     parser.add_argument("--task-ids", nargs="+")
+    parser.add_argument(
+        "--all-base-tasks",
+        action="store_true",
+        help=(
+            "Evaluate every task in the official Retail base split. This is mutually "
+            "exclusive with --task-ids and may incur substantial model cost."
+        ),
+    )
     parser.add_argument(
         "--agent-instruction-profile",
         choices=sorted(AGENT_INSTRUCTION_PROFILES),
@@ -121,13 +183,26 @@ def main() -> int:
         action="store_true",
         help="Execute the API-backed run. Without this flag, only record a dry run.",
     )
+    parser.add_argument(
+        "--auto-resume",
+        action="store_true",
+        help=(
+            "Resume the same official save-to checkpoint without prompting. "
+            "Infrastructure-error simulations are rerun by the official runner."
+        ),
+    )
     args = parser.parse_args()
 
+    if args.all_base_tasks and args.task_ids:
+        parser.error("--all-base-tasks cannot be combined with --task-ids")
     manifest_task_ids = [task.task_id for task in load_manifest().tasks]
-    task_ids = args.task_ids or manifest_task_ids
-    unknown_task_ids = sorted(set(task_ids) - set(manifest_task_ids))
-    if unknown_task_ids:
-        parser.error(f"Task IDs are outside the fixed manifest: {unknown_task_ids}")
+    task_ids = None if args.all_base_tasks else (args.task_ids or manifest_task_ids)
+    if args.task_ids:
+        unknown_task_ids = sorted(set(args.task_ids) - set(manifest_task_ids))
+        if unknown_task_ids:
+            parser.error(f"Task IDs are outside the fixed manifest: {unknown_task_ids}")
+    expected_task_count = 114 if args.all_base_tasks else len(task_ids)
+    expected_simulation_count = expected_task_count * args.num_trials
 
     protocol = "strict" if args.enforce_communication_protocol else "compatible"
     artifact_label = args.artifact_label or protocol
@@ -143,6 +218,7 @@ def main() -> int:
         num_trials=args.num_trials,
         task_ids=task_ids,
         enforce_communication_protocol=args.enforce_communication_protocol,
+        auto_resume=args.auto_resume,
     )
     configured_keys = load_model_credentials()
     record = {
@@ -150,6 +226,9 @@ def main() -> int:
         "mode": "execute" if args.execute else "dry_run",
         "tau2_root": str(tau2_root),
         "task_ids": task_ids,
+        "task_scope": "official_retail_base_all" if args.all_base_tasks else "selected_subset",
+        "expected_task_count": expected_task_count,
+        "expected_simulation_count": expected_simulation_count,
         "agent_model": args.agent_model,
         "user_model": args.user_model,
         "evaluator_model": args.evaluator_model,
@@ -159,6 +238,7 @@ def main() -> int:
         ),
         "num_trials": args.num_trials,
         "enforce_communication_protocol": args.enforce_communication_protocol,
+        "auto_resume": args.auto_resume,
         "configured_key_names": configured_keys,
         "command": command,
         "status": "prepared" if configured_keys else "prepared_missing_api_key",
@@ -197,9 +277,21 @@ def main() -> int:
 
     source_results = tau2_root / "data" / "simulations" / args.save_to / "results.json"
     if completed.returncode == 0 and source_results.is_file():
-        copied_results = artifact_dir / f"llm_baseline_results_{artifact_label}.json"
-        shutil.copy2(source_results, copied_results)
-        record["copied_results"] = str(copied_results)
+        source_payload = json.loads(source_results.read_text(encoding="utf-8"))
+        actual_simulation_count, unscored_simulations = assess_result_completeness(
+            source_payload,
+            expected_simulation_count=expected_simulation_count,
+        )
+        record["actual_simulation_count"] = actual_simulation_count
+        record["unscored_simulations"] = unscored_simulations
+        if actual_simulation_count == expected_simulation_count and not unscored_simulations:
+            copied_results = artifact_dir / f"llm_baseline_results_{artifact_label}.json"
+            shutil.copy2(source_results, copied_results)
+            record["copied_results"] = str(copied_results)
+        else:
+            record["status"] = "incomplete_results"
+            record["source_results"] = str(source_results)
+            completed = subprocess.CompletedProcess(command, 3)
 
     launch_record.write_text(
         json.dumps(record, ensure_ascii=False, indent=2),

@@ -1143,6 +1143,52 @@ uv run ruff format --check .
 
 ---
 
+## 2026-08-13｜完整官方 Retail base 单轮评测
+
+### 本次目标
+
+不再只跑固定 9 题，而是使用官方 τ2 1.0.1 Retail `base` split 全部 114 题，
+完成 DeepSeek V4 Flash 单轮基线并保存可审计轨迹。
+
+### 已完成
+
+1. 为 `run_tau2_llm_baseline.py` 增加 `--all-base-tasks`，全量时省略 `--task-ids`；
+2. 为官方检查点增加 `--auto-resume` 透传；
+3. 将完整性验收改为 `任务数 × num_trials`；
+4. 要求每个 `(task_id, trial)` 唯一，无缺失、无 `infrastructure_error`、每条有官方奖励；
+5. 新增离线汇总工具，分离有效失败、基础设施错误和未评分条目；
+6. 运行完整 114 题，固定客服/用户/裁判模型、温度 0、并发 1、seed 300；
+7. 首轮任务 6 因空模型响应留下基础设施错误，单独归档首轮证据；
+8. 用官方同一 `save-to` 检查点续跑，保留 113 个正常条目并只补测任务 6；
+9. 最终结果 114/114 有效，108 通过、6 失败，Pass¹ 94.74%；
+10. 失败任务为 38、59、64、79、100、105；最终无缺题、重复或基础设施错误；
+11. 生成 JSON/Markdown 汇总和完整中文报告；
+12. 本次使用官方任务、工具、沙箱和评分代码，但自然语言裁判也使用 DeepSeek，
+    所以明确不称为官方默认裁判配置。
+
+### 结果边界
+
+- 这是完整 Retail 单轮成绩，不是τ2全领域 Overall；
+- 官方允许单域提交，但强烈建议每域至少 4 trials；
+- 本次 1 trial 不足以计算更高的 Passᵏ，不冒充提交级稳定性结论；
+- LiteLLM 没有正确识别 DeepSeek V4 Flash 价格映射，结果文件数值未声明币种，
+  真实费用以 DeepSeek 控制台为准。
+
+### 涉及文件
+
+- `scripts/run_tau2_llm_baseline.py`
+- `scripts/summarize_tau2_results.py`
+- `tests/test_tau2_full_base_runner.py`
+- `tests/test_tau2_results_summary.py`
+- `docs/TAU2_FULL_RETAIL_REPORT.md`
+- `docs/DAY2_GUIDE.md`
+- `docs/DEVELOPMENT_PLAN.md`
+- `docs/DEVLOG.md`
+- `README.md`
+- `artifacts/day2/llm_baseline_*_retail_base_full*`
+
+---
+
 ## 2026-08-10｜恢复官方测试口径为默认逻辑
 
 ### 本次目标
