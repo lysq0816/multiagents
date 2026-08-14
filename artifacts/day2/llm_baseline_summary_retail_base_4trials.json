@@ -1,0 +1,91 @@
+{
+  "counts": {
+    "total": 456,
+    "scored": 456,
+    "pass": 421,
+    "fail": 35,
+    "infrastructure_error": 0,
+    "other_unscored": 0
+  },
+  "pass_rate_scored": 0.9232456140350878,
+  "termination_counts": {
+    "user_stop": 456
+  },
+  "task_coverage": {
+    "expected_count": 114,
+    "observed_count": 114,
+    "missing_count": 0,
+    "unexpected_count": 0,
+    "missing_task_ids": [],
+    "unexpected_task_ids": [],
+    "complete": true
+  },
+  "trial_coverage": {
+    "expected_trials_per_task": 4,
+    "observed_trial_ids": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "expected_simulation_count": 456,
+    "observed_unique_task_trials": 456,
+    "missing_count": 0,
+    "unexpected_count": 0,
+    "duplicate_count": 0,
+    "missing_task_trials": [],
+    "unexpected_task_trials": [],
+    "duplicate_task_trials": [],
+    "complete": true
+  },
+  "cost": {
+    "currency": null,
+    "agent": {
+      "sum_recorded": 0.0068506536,
+      "simulations_with_value": 456,
+      "simulations_missing_value": 0,
+      "complete": true
+    },
+    "user": {
+      "sum_recorded": 0.0015524992000000002,
+      "simulations_with_value": 456,
+      "simulations_missing_value": 0,
+      "complete": true
+    },
+    "combined_sum_recorded": 0.0084031528,
+    "note": "The results file does not declare a currency; no currency is assumed."
+  },
+  "usage": {
+    "agent": {
+      "message_usage": {
+        "source": "messages[].usage",
+        "totals": {
+          "completion_tokens": 1801427,
+          "prompt_tokens": 31807748
+        },
+        "simulations_with_usage": 456,
+        "simulations_missing_usage": 0,
+        "messages_with_usage": 4554
+      },
+      "session_usage": {
+        "source": "agent_usage.records[]",
+        "totals": {},
+        "simulations_with_usage": 0,
+        "simulations_missing_usage": 456,
+        "records_with_usage": 0
+      }
+    },
+    "user": {
+      "message_usage": {
+        "source": "messages[].usage",
+        "totals": {
+          "completion_tokens": 511109,
+          "prompt_tokens": 2630428
+        },
+        "simulations_with_usage": 456,
+        "simulations_missing_usage": 0,
+        "messages_with_usage": 2701
+      }
+    }
+  }
+}

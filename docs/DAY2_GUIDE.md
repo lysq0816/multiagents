@@ -11,6 +11,11 @@
 Pass¹ 为 94.74%，最终 0 基础设施错误、0 缺题、0 重复。详细口径和产物见
 [TAU2_FULL_RETAIL_REPORT.md](TAU2_FULL_RETAIL_REPORT.md)。
 
+2026-08-14 继续补足官方建议的 4 trials：114 题 × 4 轮共 456 条轨迹全部有效，421 条
+通过、35 条失败；官方 Pass¹–Pass⁴ 为 92.32%、87.43%、83.33%、79.82%。最终没有
+基础设施错误、缺失或重复。该结果评测的是官方 `llm_agent` 单智能体，不是项目自定义
+多智能体工作流。
+
 ## 今天具体做了什么
 
 ### 1. 接入官方环境
@@ -64,7 +69,7 @@ Pass¹ 为 94.74%，最终 0 基础设施错误、0 缺题、0 重复。详细�
 - 默认使用官方 `llm_agent` 原始提示，不追加项目提示；
 - 使用官方数据库、动作参数和自然语言断言评分结果；
 - 温度为 0；
-- 单并发；
+- 默认单并发，也可用 `--max-concurrency` 显式控制；
 - 固定随机种子 300；
 - 保存详细对话、工具、延迟、token 和成本；
 - 默认只 dry-run，必须显式传入 `--execute` 才会调用模型。
@@ -131,6 +136,10 @@ OpenAI 模型凭证。
 
 ## DeepSeek 真实基线结果
 
+当前主结果是完整 Retail 四轮：456 条有效轨迹、421 通过、35 失败，Pass¹–Pass⁴ 为
+92.32%、87.43%、83.33%、79.82%。下面的 `8/9` 表格是早期固定 9 题结果，保留用于说明
+开发过程，不替代四轮主结果。
+
 最终将兼容模式首轮的 6 个正常任务，与评分器修复后恢复的 3 个自然语言断言任务
 合并，得到同一固定任务集上的结果：
 
@@ -174,3 +183,7 @@ OpenAI 模型凭证。
 - `artifacts/day2/llm_baseline_results_compatible.json`：DeepSeek 兼容模式结果；
 - `artifacts/day2/llm_baseline_results_recovery_v2.json`：3 个评分恢复任务结果；
 - `artifacts/day2/llm_baseline_results_strict.json`：严格通信模式诊断结果。
+- `artifacts/day2/llm_baseline_results_retail_base_4trials.json`：完整 Retail 四轮轨迹；
+- `artifacts/day2/llm_baseline_summary_retail_base_4trials.json`：四轮机器可读汇总；
+- `artifacts/day2/llm_baseline_summary_retail_base_4trials.md`：四轮简洁汇总；
+- `artifacts/day2/llm_baseline_launch_retail_base_4trials.json`：四轮最终命令与验收记录。

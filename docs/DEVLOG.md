@@ -1245,7 +1245,7 @@ uv run ruff format --check .
 - 后续默认基线：官方客服提示、官方工具和数据库、官方精确评分；
 - 自然语言评分器：流程不变，当前因凭证条件使用 DeepSeek 代替官方默认 OpenAI
   裁判；若要模型也完全一致，需要另配 OpenAI Key；
-- 唯一基准成绩：`8/9`；
+- 当时固定 9 题基准成绩：`8/9`；
 - 任务 38 的本地业务值：仅诊断，不计入成绩；
 - 历史提示增强运行：仅诊断，不与官方基线合并。
 
@@ -1253,3 +1253,87 @@ uv run ruff format --check .
 
 - 分支：`master`
 - 提交：尚未提交
+
+---
+
+## 2026-08-14｜完整官方 Retail base 四轮评测
+
+### 本次目标
+
+在 2026-08-13 已完成的 114 题单轮基础上，继续运行到官方强烈建议的每题 4 trials，
+补齐基础设施失败，使用 τ2 官方代码计算 Pass¹–Pass⁴，并保存可提交、可复核的完整产物。
+
+### 已完成
+
+1. 先生成不调用模型的四轮 dry-run，确认完整 Retail `base`、114 题、4 轮、预期 456 条，
+   命令未传 `--task-ids`，客服提示为官方原始提示；
+2. 在单轮 checkpoint 上新增目标轨迹 342 条；扩轮初段并发为 1，确认 checkpoint 可安全恢复后
+   将 `--max-concurrency` 设为 3，模型、任务、seed、提示和评分口径未改变；
+3. 为启动器增加 `--max-concurrency` 参数透传与单元测试；
+4. 运行期间 trial 1 的任务 21、trial 2 的任务 65、trial 3 的任务 23 因空模型响应留下
+   `infrastructure_error`；使用官方相同 `save-to` 与 `--auto-resume` 只补失败项，最终全部成功评分；
+5. 最终覆盖 114 题 × 4 轮，共 456 个唯一 `(task_id, trial)`，0 缺失、0 意外、0 重复、
+   0 未评分、0 基础设施错误；
+6. 各轮结果：trial 0 为 108/114，trial 1 为 101/114，trial 2 为 103/114，trial 3 为
+   109/114；总计 421 条通过、35 条失败；
+7. 直接调用 τ2 1.0.1 官方 `compute_metrics`：Pass¹ 92.32%、Pass² 87.43%、Pass³
+   83.33%、Pass⁴ 79.82%；
+8. 发现官方从单轮 checkpoint 扩展时保留旧 `info.num_trials=1`，导致官方指标入口只显示
+   Pass¹；启动器现在仅在 456 条全部验收通过后，把复制产物的描述性元数据规范化为 4，
+   不修改任何轨迹或奖励；
+9. 发现 τ2 1.0.1 在 Windows 的 `Results.load()` 未显式指定编码；复制产物继续使用 JSON
+   ASCII 转义，避免 UTF-8 中文被系统 GBK 解码失败；
+10. 重新生成 JSON/Markdown 汇总，覆盖率为 456/456，missing、unexpected、duplicate 均为 0；
+11. 更新 README、第 2 天说明、开发计划和完整 Retail 报告，保留单轮结果为历史 trial 0；
+12. 明确结果边界：这是官方 `llm_agent` 单智能体的 Retail 单域四轮基线，不是项目自定义
+    多智能体成绩，也不是 τ2 全领域 Overall。
+
+### 四轮结果
+
+| 指标 | 结果 |
+|---|---:|
+| 有效轨迹 | 456/456 |
+| 通过 / 失败轨迹 | 421 / 35 |
+| Pass¹ | 92.32% |
+| Pass² | 87.43% |
+| Pass³ | 83.33% |
+| Pass⁴ | 79.82% |
+| 最终基础设施错误 | 0 |
+
+### 涉及文件
+
+- `scripts/run_tau2_llm_baseline.py`
+- `tests/test_tau2_full_base_runner.py`
+- `README.md`
+- `docs/DAY2_GUIDE.md`
+- `docs/DEVELOPMENT_PLAN.md`
+- `docs/DEVLOG.md`
+- `docs/TAU2_FULL_RETAIL_REPORT.md`
+- `artifacts/day2/llm_baseline_launch_retail_base_4trials*.json`
+- `artifacts/day2/llm_baseline_results_retail_base_4trials.json`
+- `artifacts/day2/llm_baseline_summary_retail_base_4trials.json`
+- `artifacts/day2/llm_baseline_summary_retail_base_4trials.md`
+
+### 验证结果
+
+```text
+uv run pytest tests\test_tau2_full_base_runner.py tests\test_tau2_results_summary.py tests\test_tau2_runner.py -q
+13 passed
+
+uv run ruff check scripts\run_tau2_llm_baseline.py tests\test_tau2_full_base_runner.py
+All checks passed!
+
+uv run ruff format --check scripts\run_tau2_llm_baseline.py tests\test_tau2_full_base_runner.py
+2 files already formatted
+```
+
+规范化后的结果已由 τ2 官方 `Results.load()` 读取，并由官方 `compute_metrics()` 输出
+Pass¹–Pass⁴；覆盖汇总为 456/456，最终基础设施错误为 0。
+
+### 费用与解释边界
+
+- 本轮调用了 DeepSeek 客服、用户模拟器和 40 道含自然语言断言任务的裁判，产生真实 API
+  费用；LiteLLM 未正确识别该模型的价格映射，实际金额以 DeepSeek 控制台为准；
+- 过程里出现过可恢复的空响应，不能写成“全程 0 基础设施错误”；最终交付产物为 0；
+- 35 是失败轨迹数，不是 35 道唯一失败题；
+- 本项目多智能体主链路尚未实现 τ2 `Agent` 适配器，不能把本结果用于证明多智能体提升。

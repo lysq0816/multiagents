@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -43,6 +42,7 @@ def build_command(
     task_ids: list[str] | None,
     enforce_communication_protocol: bool,
     auto_resume: bool = False,
+    max_concurrency: int = 1,
 ) -> list[str]:
     """Build a deterministic official CLI command for a subset or the full base split."""
 
@@ -69,7 +69,7 @@ def build_command(
         "--num-trials",
         str(num_trials),
         "--max-concurrency",
-        "1",
+        str(max_concurrency),
         "--max-steps",
         "80",
         "--timeout",
@@ -140,6 +140,21 @@ def assess_result_completeness(
     return len(simulations), incomplete_simulations
 
 
+def normalize_result_trial_metadata(
+    source_payload: dict[str, object],
+    *,
+    expected_num_trials: int,
+) -> object:
+    """Align copied result metadata with the already-validated trial coverage."""
+
+    info = source_payload.get("info")
+    if not isinstance(info, dict):
+        raise TypeError("Official result payload is missing an info object")
+    source_num_trials = info.get("num_trials")
+    info["num_trials"] = expected_num_trials
+    return source_num_trials
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tau2-root", type=Path)
@@ -151,6 +166,12 @@ def main() -> int:
         default="after_sales_day2_deepseek_v4_flash_compatible",
     )
     parser.add_argument("--num-trials", type=int, default=1)
+    parser.add_argument(
+        "--max-concurrency",
+        type=int,
+        default=1,
+        help="Number of official tau2 simulations to run concurrently.",
+    )
     parser.add_argument("--task-ids", nargs="+")
     parser.add_argument(
         "--all-base-tasks",
@@ -195,6 +216,8 @@ def main() -> int:
 
     if args.all_base_tasks and args.task_ids:
         parser.error("--all-base-tasks cannot be combined with --task-ids")
+    if args.max_concurrency < 1:
+        parser.error("--max-concurrency must be at least 1")
     manifest_task_ids = [task.task_id for task in load_manifest().tasks]
     task_ids = None if args.all_base_tasks else (args.task_ids or manifest_task_ids)
     if args.task_ids:
@@ -219,6 +242,7 @@ def main() -> int:
         task_ids=task_ids,
         enforce_communication_protocol=args.enforce_communication_protocol,
         auto_resume=args.auto_resume,
+        max_concurrency=args.max_concurrency,
     )
     configured_keys = load_model_credentials()
     record = {
@@ -237,6 +261,7 @@ def main() -> int:
             args.agent_instruction_profile == OFFICIAL_AGENT_INSTRUCTION_PROFILE
         ),
         "num_trials": args.num_trials,
+        "max_concurrency": args.max_concurrency,
         "enforce_communication_protocol": args.enforce_communication_protocol,
         "auto_resume": args.auto_resume,
         "configured_key_names": configured_keys,
@@ -285,9 +310,19 @@ def main() -> int:
         record["actual_simulation_count"] = actual_simulation_count
         record["unscored_simulations"] = unscored_simulations
         if actual_simulation_count == expected_simulation_count and not unscored_simulations:
+            source_num_trials = normalize_result_trial_metadata(
+                source_payload,
+                expected_num_trials=args.num_trials,
+            )
             copied_results = artifact_dir / f"llm_baseline_results_{artifact_label}.json"
-            shutil.copy2(source_results, copied_results)
+            copied_results.write_text(
+                json.dumps(source_payload, ensure_ascii=True, indent=2),
+                encoding="utf-8",
+            )
             record["copied_results"] = str(copied_results)
+            record["source_num_trials"] = source_num_trials
+            record["artifact_num_trials"] = args.num_trials
+            record["trial_metadata_normalized"] = source_num_trials != args.num_trials
         else:
             record["status"] = "incomplete_results"
             record["source_results"] = str(source_results)
