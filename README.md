@@ -14,6 +14,8 @@
 - [x] 完成 DeepSeek V4 Flash 真实单智能体基线（兼容模式最终 8/9）
 - [x] 后续基线默认使用官方 τ2 原始提示与官方精确评分（历史增强结果仅作诊断）
 - [x] 完成官方 Retail `base` 114 题 × 4 trials，共 456 条有效轨迹
+- [x] 接入官方 τ2 `HalfDuplexAgent` 的真实多智能体运行时并完成 7 项能力冒烟（7/7）
+- [ ] 完成自定义多智能体 Retail `base` 114 题 × 4 trials 正式评测
 - [x] 完成第 3 天政策检索、事实绑定和有来源资格判断
 - [x] 完成第 4 天订单/政策智能体、结构化交接和最小工具权限
 - [x] 完成第 5 天候选方案汇总、冲突检测和澄清门控
@@ -30,6 +32,8 @@
 [docs/DAY2_GUIDE.md](docs/DAY2_GUIDE.md)。
 官方 Retail `base` split 114 题四轮结果、续跑过程和提交口径见
 [docs/TAU2_FULL_RETAIL_REPORT.md](docs/TAU2_FULL_RETAIL_REPORT.md)。
+自定义 τ2 多智能体架构、兼容性修复和正式评测进度见
+[docs/TAU2_MULTIAGENT_REPORT.md](docs/TAU2_MULTIAGENT_REPORT.md)。
 
 第 3 天政策条款、检索和事实绑定说明见
 [docs/DAY3_GUIDE.md](docs/DAY3_GUIDE.md)。
@@ -91,6 +95,24 @@ uv run python scripts\run_all_demos.py
 τ2 成绩。实验未调用模型或真实写工具；“延迟”是操作预算代理值，不是墙钟延迟。完整
 逐次结果见 `artifacts/day8/experiment_report.json`。
 
+## 官方 τ2 多智能体适配器
+
+项目现已注册自定义官方 Agent 名称 `after_sales_multiagent`。它通过 τ2 的
+`HalfDuplexAgent` 协议接收用户消息和工具结果，对普通请求只调用协调员；复杂请求会额外
+调用订单/约束专员；任何写工具候选都会先经过政策专员和独立审计员。最终工具调用由 τ2
+官方 Orchestrator 执行，项目代码不会直接修改官方环境数据库。
+
+2026-08-14 的 7 项定向能力冒烟覆盖换货、退货、修改订单商品、订单地址、支付方式、
+用户地址和无写操作场景，官方 reward 与 DB 检查均为 `7/7`。这 7 题只跑了 1 trial，
+不能代替完整 114 题榜单成绩，也不能据此声称优于官方单智能体基线。所有内部角色目前
+使用同一个 DeepSeek 模型；Agent 侧共记录 123 次角色调用和 839,285 tokens，美元成本因
+LiteLLM 缺少该模型价格映射而不可得。
+
+完整架构、task 66 的模拟用户/隐藏参考冲突、兼容性修复和产物说明见
+[docs/TAU2_MULTIAGENT_REPORT.md](docs/TAU2_MULTIAGENT_REPORT.md)。自定义多智能体的
+Retail 114 题 × 4 trials 正式评测仍是下一项工作，完成前不会与单智能体 Pass¹–Pass⁴
+直接比较。
+
 ## 核心约束
 
 - 普通查询优先走单智能体，只有复杂工单才启动专业智能体。
@@ -133,6 +155,15 @@ uv run python scripts\run_delivery_scenarios.py
 
 ```powershell
 python scripts\run_tau2_llm_baseline.py
+```
+
+选择自定义多智能体运行时（下面仍是 dry-run）：
+
+```powershell
+python scripts\run_tau2_llm_baseline.py `
+  --agent-implementation after_sales_multiagent `
+  --task-ids 0 2 3 10 17 33 40 `
+  --artifact-label multiagent_dry_run
 ```
 
 启动记录中的下面两个字段表示使用官方客服提示：

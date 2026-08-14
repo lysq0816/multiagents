@@ -196,3 +196,21 @@ MVP 仅处理：
 - [x] 全量测试、Ruff 和格式检查已纳入发布自检；
 - [x] 默认最终演示不调用模型、不连接真实业务系统；
 - [ ] 在 Docker 可用主机上实际构建并启动容器。
+
+## 11. 官方 τ2 多智能体扩展（2026-08-14）
+
+- [x] 实现并注册 `after_sales_multiagent` 官方 `HalfDuplexAgent`；
+- [x] 将难度路由、协调员、订单/约束专员、政策专员和独立审计员接入真实对话循环；
+- [x] 让所有 Retail 工具继续由 τ2 官方 Orchestrator 执行；
+- [x] 写操作在政策或审计交接无效、政策拒绝、审计拒绝或缺少必要确认时关闭执行；
+- [x] 为每条客服输出记录内部角色、结构化交接、审批、usage 和修复 trace；
+- [x] 校验最终结果中的 Agent、用户模拟器、模型和 Retail 域身份，防止复用错误 checkpoint；
+- [x] 修复 DeepSeek 工具调用历史的 `reasoning_content` 回放兼容问题；
+- [x] 完成 7 个写能力/无写场景的官方单轮冒烟，reward 与 DB 均为 7/7；
+- [ ] 完成自定义多智能体 Retail `base` 114 题 × 4 trials，共 456 条有效轨迹；
+- [ ] 使用 τ2 官方指标计算多智能体 Pass¹–Pass⁴，并在相同任务、轮次、模型和裁判口径下
+  与官方 `llm_agent` 基线比较。
+
+说明：该扩展是为 τ2 新建的真实多角色运行时，主要复用项目的 `DifficultyRouter` 和治理
+原则，并未把旧的 `PlanningWorkflow`、`HumanApprovalGate` 或本地 sandbox 原样嵌入官方
+环境。所有内部角色当前使用同一个 DeepSeek 模型，官方用户模拟器和裁判不计为项目智能体。

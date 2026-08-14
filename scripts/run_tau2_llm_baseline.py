@@ -12,9 +12,15 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from after_sales_agents.benchmark.tau2_adapter import load_manifest, locate_tau2_root
+from after_sales_agents.benchmark.tau2_adapter import (
+    load_manifest,
+    load_official_retail_data,
+    locate_tau2_root,
+)
 from after_sales_agents.benchmark.tau2_runtime import (
     AGENT_INSTRUCTION_PROFILES,
+    MULTI_AGENT_IMPLEMENTATION,
+    OFFICIAL_AGENT_IMPLEMENTATION,
     OFFICIAL_AGENT_INSTRUCTION_PROFILE,
     build_subprocess_environment,
 )
@@ -41,6 +47,7 @@ def build_command(
     num_trials: int,
     task_ids: list[str] | None,
     enforce_communication_protocol: bool,
+    agent_implementation: str = OFFICIAL_AGENT_IMPLEMENTATION,
     auto_resume: bool = False,
     max_concurrency: int = 1,
 ) -> list[str]:
@@ -53,7 +60,7 @@ def build_command(
         "--domain",
         "retail",
         "--agent",
-        "llm_agent",
+        agent_implementation,
         "--agent-llm",
         agent_model,
         "--agent-llm-args",
@@ -94,6 +101,11 @@ def assess_result_completeness(
     source_payload: dict[str, object],
     *,
     expected_simulation_count: int,
+    expected_agent_implementation: str | None = None,
+    expected_agent_model: str | None = None,
+    expected_user_implementation: str | None = None,
+    expected_user_model: str | None = None,
+    expected_domain: str | None = None,
 ) -> tuple[int, list[dict[str, object]]]:
     """Return the result count and entries that prevent a complete official run."""
 
@@ -137,6 +149,29 @@ def assess_result_completeness(
                 "actual": len(simulations),
             }
         )
+
+    expected_identity = {
+        "info.agent_info.implementation": expected_agent_implementation,
+        "info.agent_info.llm": expected_agent_model,
+        "info.user_info.implementation": expected_user_implementation,
+        "info.user_info.llm": expected_user_model,
+        "info.environment_info.domain_name": expected_domain,
+    }
+    for field, expected in expected_identity.items():
+        if expected is None:
+            continue
+        actual: object = source_payload
+        for key in field.split("."):
+            actual = actual.get(key) if isinstance(actual, dict) else None
+        if actual != expected:
+            incomplete_simulations.append(
+                {
+                    "reason": "result_identity_mismatch",
+                    "field": field,
+                    "expected": expected,
+                    "actual": actual,
+                }
+            )
     return len(simulations), incomplete_simulations
 
 
@@ -166,6 +201,12 @@ def main() -> int:
         default="after_sales_day2_deepseek_v4_flash_compatible",
     )
     parser.add_argument("--num-trials", type=int, default=1)
+    parser.add_argument(
+        "--agent-implementation",
+        choices=[OFFICIAL_AGENT_IMPLEMENTATION, MULTI_AGENT_IMPLEMENTATION],
+        default=OFFICIAL_AGENT_IMPLEMENTATION,
+        help="Official single agent or the project difficulty-routed multi-agent runtime.",
+    )
     parser.add_argument(
         "--max-concurrency",
         type=int,
@@ -218,13 +259,16 @@ def main() -> int:
         parser.error("--all-base-tasks cannot be combined with --task-ids")
     if args.max_concurrency < 1:
         parser.error("--max-concurrency must be at least 1")
+    tau2_root = locate_tau2_root(args.tau2_root)
+    _, split_tasks = load_official_retail_data(tau2_root)
+    base_task_ids = {str(task_id) for task_id in split_tasks.get("base", [])}
     manifest_task_ids = [task.task_id for task in load_manifest().tasks]
     task_ids = None if args.all_base_tasks else (args.task_ids or manifest_task_ids)
     if args.task_ids:
-        unknown_task_ids = sorted(set(args.task_ids) - set(manifest_task_ids))
+        unknown_task_ids = sorted(set(args.task_ids) - base_task_ids)
         if unknown_task_ids:
-            parser.error(f"Task IDs are outside the fixed manifest: {unknown_task_ids}")
-    expected_task_count = 114 if args.all_base_tasks else len(task_ids)
+            parser.error(f"Task IDs are outside the official Retail base split: {unknown_task_ids}")
+    expected_task_count = len(base_task_ids) if args.all_base_tasks else len(task_ids)
     expected_simulation_count = expected_task_count * args.num_trials
 
     protocol = "strict" if args.enforce_communication_protocol else "compatible"
@@ -232,7 +276,6 @@ def main() -> int:
     if not artifact_label.replace("-", "").replace("_", "").isalnum():
         parser.error("--artifact-label may contain only letters, numbers, '-' and '_'")
 
-    tau2_root = locate_tau2_root(args.tau2_root)
     command = build_command(
         tau2_root,
         agent_model=args.agent_model,
@@ -241,6 +284,7 @@ def main() -> int:
         num_trials=args.num_trials,
         task_ids=task_ids,
         enforce_communication_protocol=args.enforce_communication_protocol,
+        agent_implementation=args.agent_implementation,
         auto_resume=args.auto_resume,
         max_concurrency=args.max_concurrency,
     )
@@ -254,16 +298,26 @@ def main() -> int:
         "expected_task_count": expected_task_count,
         "expected_simulation_count": expected_simulation_count,
         "agent_model": args.agent_model,
+        "agent_implementation": args.agent_implementation,
+        "architecture": (
+            "difficulty_routed_multi_agent"
+            if args.agent_implementation == MULTI_AGENT_IMPLEMENTATION
+            else "single_agent"
+        ),
         "user_model": args.user_model,
         "evaluator_model": args.evaluator_model,
         "agent_instruction_profile": args.agent_instruction_profile,
         "official_agent_prompt": (
-            args.agent_instruction_profile == OFFICIAL_AGENT_INSTRUCTION_PROFILE
+            args.agent_implementation == OFFICIAL_AGENT_IMPLEMENTATION
+            and args.agent_instruction_profile == OFFICIAL_AGENT_INSTRUCTION_PROFILE
         ),
         "num_trials": args.num_trials,
         "max_concurrency": args.max_concurrency,
         "enforce_communication_protocol": args.enforce_communication_protocol,
         "auto_resume": args.auto_resume,
+        "deepseek_reasoning_content_replay": any(
+            model.lower().startswith("deepseek/") for model in (args.agent_model, args.user_model)
+        ),
         "configured_key_names": configured_keys,
         "command": command,
         "status": "prepared" if configured_keys else "prepared_missing_api_key",
@@ -295,6 +349,9 @@ def main() -> int:
     environment = build_subprocess_environment(
         evaluator_model=args.evaluator_model,
         agent_instruction_profile=args.agent_instruction_profile,
+        agent_implementation=args.agent_implementation,
+        agent_model=args.agent_model,
+        user_model=args.user_model,
     )
     completed = subprocess.run(command, cwd=tau2_root, env=environment, check=False)
     record["status"] = "completed" if completed.returncode == 0 else "failed"
@@ -306,6 +363,11 @@ def main() -> int:
         actual_simulation_count, unscored_simulations = assess_result_completeness(
             source_payload,
             expected_simulation_count=expected_simulation_count,
+            expected_agent_implementation=args.agent_implementation,
+            expected_agent_model=args.agent_model,
+            expected_user_implementation="user_simulator",
+            expected_user_model=args.user_model,
+            expected_domain="retail",
         )
         record["actual_simulation_count"] = actual_simulation_count
         record["unscored_simulations"] = unscored_simulations

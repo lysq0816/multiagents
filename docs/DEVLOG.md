@@ -1337,3 +1337,93 @@ Pass¹–Pass⁴；覆盖汇总为 456/456，最终基础设施错误为 0。
 - 过程里出现过可恢复的空响应，不能写成“全程 0 基础设施错误”；最终交付产物为 0；
 - 35 是失败轨迹数，不是 35 道唯一失败题；
 - 本项目多智能体主链路尚未实现 τ2 `Agent` 适配器，不能把本结果用于证明多智能体提升。
+
+---
+
+## 2026-08-14｜官方 τ2 多智能体运行时与能力冒烟
+
+### 本次目标
+
+把项目从“官方 `llm_agent` 单智能体基线”推进到可被 τ2 1.0.1 直接加载的真实多智能体
+Agent，在不修改官方任务、工具、数据库和评分代码的前提下，先完成协议验证和多类写动作
+小样本，再进入 114 题 × 4 trials 正式评测。
+
+### 已完成
+
+1. 新增 `after_sales_multiagent`，实现官方 `HalfDuplexAgent` 的状态与消息协议；
+2. 接入确定性难度路由。普通轮次由协调员处理，复杂轮次增加订单/约束专员；写工具候选
+   再分别交给政策专员和独立审计员；
+3. 保留官方工具执行边界：Agent 只返回 `AssistantMessage` 或 `ToolCall`，由 τ2
+   Orchestrator 执行并把 `ToolMessage` 送回；
+4. 写操作改为 fail-closed：政策或审计交接缺失/解析失败、政策拒绝、审计拒绝、需要确认但
+   尚未确认时均不执行；
+5. 压缩内部 transcript，只保留角色、文本和工具调用；审查载荷不再携带 provider 原始响应；
+6. 记录每轮的路由、内部角色、政策结果、审计结果、usage 覆盖、修复次数和累计角色调用；
+7. 启动器支持选择 `llm_agent` 或 `after_sales_multiagent`，支持官方 Retail base 内任意显式
+   task ID，并在复制结果前核验 Agent、用户模拟器、模型和域身份；
+8. 定位并修复 DeepSeek 思考模式下的工具历史回放 400：τ2 1.0.1 保存了原始
+   `reasoning_content`，但历史转换时未回放；项目 bootstrap 只补回该字段，不修改外部
+   τ2 checkout；
+9. DeepSeek 的约束、政策和审计结构化调用通过 `extra_body.thinking=disabled` 关闭思考，
+   最终协调员仍保留思考；真实 task 66 中政策/审计调用从约 51/47 秒降到约 1 秒；
+10. 对真实出现的结构化形状做窄归一化：`risk_notes` 字符串转单元素数组、空值转空数组，
+    `repair_instruction=null` 转空字符串；其他字段继续严格校验；
+11. task 66 最终可在 56.33 秒内完成官方写操作，但 reward 为 0：用户模拟器明确确认
+    `ordered by mistake`，Agent 按官方允许理由执行，隐藏参考却固定为 `no longer needed`；
+12. 完成 task 0、2、3、10、17、33、40 的定向能力试跑，7 条均 `user_stop`，官方 reward、
+    DB 检查均为 1.0；覆盖换货、退货、改订单商品、改订单地址、改支付、改用户地址和无写场景。
+
+### 7 项能力结果
+
+| Task | 场景 | Reward | 墙钟时间 | 内部角色调用 | Agent tokens |
+|---:|---|---:|---:|---:|---:|
+| 0 | 换货 | 1.0 | 55.14s | 17 | 103,870 |
+| 2 | 退货 | 1.0 | 128.03s | 32 | 259,793 |
+| 3 | 修改订单商品 | 1.0 | 69.96s | 23 | 188,421 |
+| 10 | 无写操作 | 1.0 | 41.51s | 13 | 65,812 |
+| 17 | 修改订单地址 | 1.0 | 17.33s | 9 | 48,572 |
+| 33 | 修改用户地址 | 1.0 | 43.33s | 12 | 81,322 |
+| 40 | 修改支付方式 | 1.0 | 57.04s | 17 | 91,495 |
+| 合计 | 7 项能力 | 7/7 | 412.33s | 123 | 839,285 |
+
+123 次内部调用包括协调员 84、订单/约束专员 15、政策专员 12、独立审计员 12。task 2、3、
+40 各发生 2 次审查后修复；task 10 有 1 次约束专员结构化交接解析失败，降级后仍完成任务。
+
+### 涉及文件与产物
+
+- `src/after_sales_agents/benchmark/tau2_multiagent_core.py`
+- `src/after_sales_agents/benchmark/tau2_multiagent_runtime.py`
+- `src/after_sales_agents/benchmark/tau2_runtime.py`
+- `scripts/tau2_with_model_overrides.py`
+- `scripts/run_tau2_llm_baseline.py`
+- `tests/test_tau2_multiagent_core.py`
+- `tests/test_tau2_runner.py`
+- `tests/test_tau2_full_base_runner.py`
+- `docs/TAU2_MULTIAGENT_REPORT.md`
+- `artifacts/day2/llm_baseline_results_multiagent_capability7_v1.json`
+- `artifacts/day2/llm_baseline_results_multiagent_task66_pilot_v1.json`
+- `artifacts/day2/llm_baseline_results_multiagent_task66_pilot_v2.json`
+
+### 验证结果
+
+```text
+uv run pytest tests/test_tau2_multiagent_core.py tests/test_tau2_runner.py tests/test_tau2_full_base_runner.py -q
+21 passed
+
+Ruff check / format（本次相关代码）
+All checks passed / formatted
+```
+
+另外在官方 τ2 虚拟环境完成了零费用协议检查：自定义名称可出现在 CLI Agent choices；
+工厂/state 可实例化；假协调员、政策和审计能完成 ToolCall 往返；DeepSeek reasoning 回放、
+重复安装保护、MultiToolMessage 兼容和结果身份校验均通过。
+
+### 当前边界与下一步
+
+- 7/7 是定向单轮样本，不代表完整 114 题成绩；
+- 所有内部角色使用同一底层 DeepSeek 模型，不是异构模型团队；
+- Agent 和官方用户模拟器使用同一模型，存在相关性偏差；
+- task 3 虽 reward=1，仍有一次额外读取动作未匹配；成功不等于轨迹完全无冗余；
+- LiteLLM 不认识 DeepSeek V4 Flash 的价格映射，美元成本不可得；
+- 下一步是新 checkpoint 上跑满 114×4，最终 456 条需 0 缺失、0 重复、0 未评分、
+  0 基础设施错误，再使用官方指标与单智能体基线比较。

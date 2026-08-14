@@ -115,6 +115,24 @@ def test_max_concurrency_is_forwarded_to_official_runner() -> None:
     assert command[index + 1] == "3"
 
 
+def test_multi_agent_implementation_is_forwarded_to_official_runner() -> None:
+    tau2_root = PROJECT_ROOT / ".external" / "tau2-bench-main"
+
+    command = MODULE.build_command(
+        tau2_root,
+        agent_model="deepseek/test",
+        user_model="deepseek/test",
+        save_to="multi-agent-test",
+        num_trials=1,
+        task_ids=["38"],
+        enforce_communication_protocol=True,
+        agent_implementation="after_sales_multiagent",
+    )
+
+    index = command.index("--agent")
+    assert command[index + 1] == "after_sales_multiagent"
+
+
 def test_result_completeness_rejects_duplicate_task_trials() -> None:
     simulation = {
         "task_id": "0",
@@ -130,6 +148,40 @@ def test_result_completeness_rejects_duplicate_task_trials() -> None:
 
     assert actual_count == 2
     assert incomplete == [{"reason": "duplicate_task_trial", "task_id": "0", "trial": 0}]
+
+
+def test_result_completeness_rejects_a_checkpoint_from_the_wrong_agent() -> None:
+    payload = {
+        "info": {
+            "agent_info": {"implementation": "llm_agent", "llm": "deepseek/test"},
+            "user_info": {
+                "implementation": "user_simulator",
+                "llm": "deepseek/test",
+            },
+            "environment_info": {"domain_name": "retail"},
+        },
+        "simulations": [],
+    }
+
+    actual_count, incomplete = MODULE.assess_result_completeness(
+        payload,
+        expected_simulation_count=0,
+        expected_agent_implementation="after_sales_multiagent",
+        expected_agent_model="deepseek/test",
+        expected_user_implementation="user_simulator",
+        expected_user_model="deepseek/test",
+        expected_domain="retail",
+    )
+
+    assert actual_count == 0
+    assert incomplete == [
+        {
+            "reason": "result_identity_mismatch",
+            "field": "info.agent_info.implementation",
+            "expected": "after_sales_multiagent",
+            "actual": "llm_agent",
+        }
+    ]
 
 
 def test_trial_metadata_is_normalized_after_validated_checkpoint_expansion() -> None:
