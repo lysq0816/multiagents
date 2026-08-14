@@ -2,6 +2,8 @@ from after_sales_agents.benchmark.tau2_multiagent_core import (
     AuditDecision,
     ConstraintLedger,
     PolicyReview,
+    contains_execution_claim,
+    contains_raw_tool_markup,
     is_explicit_confirmation,
     is_review_approved,
     is_write_tool,
@@ -63,6 +65,18 @@ def test_confirmation_fallback_is_explicit_and_write_tools_are_bounded() -> None
     assert is_write_tool("modify_pending_order_items") is True
     assert is_write_tool("get_order_details") is False
     assert is_write_tool("transfer_to_human_agents") is False
+
+
+def test_provider_tool_markup_is_never_treated_as_customer_text() -> None:
+    assert (
+        contains_raw_tool_markup(
+            '<｜｜DSML｜｜tool_calls><｜｜DSML｜｜invoke name="exchange_order_items">'
+        )
+        is True
+    )
+    assert contains_raw_tool_markup("I have not made any changes yet.") is False
+    assert contains_execution_claim("Your exchange request has been submitted.") is True
+    assert contains_execution_claim("Once processed, instructions will be emailed.") is False
 
 
 def test_review_never_approves_a_write_when_required_confirmation_is_missing() -> None:

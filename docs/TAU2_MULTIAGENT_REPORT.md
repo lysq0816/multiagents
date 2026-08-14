@@ -1,13 +1,17 @@
 # 官方 τ2 多智能体运行时报告
 
-更新时间：2026-08-14
+更新时间：2026-08-15
 
 ## 当前结论
 
 项目已经实现可被 τ2 1.0.1 官方 runner 直接加载的自定义 Agent：
-`after_sales_multiagent`。它在 7 个定向 Retail 能力任务上完成单轮试跑，官方 reward 与
-最终数据库检查均为 `7/7`。这证明协议、角色协作、官方工具执行和评分链路已经接通，但
-7 题不是完整榜单，暂时不能与 114 题 × 4 trials 的单智能体 Pass¹–Pass⁴ 比较。
+`after_sales_multiagent`，并已完成 Retail `base` 全部 114 题 × 4 trials。最终产物包含
+456 个唯一 `(task_id, trial)`，354 条通过、102 条失败，0 缺失、0 重复、0 未评分、
+0 基础设施错误。τ2 1.0.1 官方 `compute_metrics` 给出的 Pass¹–Pass⁴ 为
+`77.6316% / 66.9591% / 60.0877% / 55.2632%`。
+
+此前 7 个定向 Retail 任务的单轮 `7/7` 继续作为能力冒烟：它证明协议、角色协作、官方
+工具执行和评分链路接通，但正式成绩只采用完整 456 条产物。
 
 ## 运行架构
 
@@ -70,6 +74,62 @@ pilot v2 中，用户模拟器明确选择 `ordered by mistake`，Agent 展示�
 政策专员和审计员均批准。隐藏参考却要求 `no longer needed`，所以 DB=0、NL=1。该轨迹仍按
 官方 reward 记失败，但不应通过硬编码隐藏参考来扭曲正常客服行为。
 
+## 正式 114 × 4 评测
+
+运行配置：
+
+- 域与任务：Retail `base`，114 题，每题 4 trials；
+- Agent：`after_sales_multiagent`；
+- Agent、用户模拟器和自然语言断言裁判：`deepseek/deepseek-v4-flash`；
+- temperature：0；seed：300；最大并发：3；
+- 单次模型请求超时：120 秒；
+- 任务、数据库、Retail 工具、Orchestrator 和评分实现均使用 τ2 1.0.1 官方代码。
+
+### 正式结果
+
+| 指标 | 多智能体结果 |
+|---|---:|
+| 有效轨迹 | 456 / 456 |
+| 通过 / 失败轨迹 | 354 / 102 |
+| trial 0 | 89 / 114 |
+| trial 1 | 86 / 114 |
+| trial 2 | 88 / 114 |
+| trial 3 | 91 / 114 |
+| Pass¹ | 77.6316% |
+| Pass² | 66.9591% |
+| Pass³ | 60.0877% |
+| Pass⁴ | 55.2632% |
+| 最终基础设施错误 | 0 |
+
+按每题四轮通过次数分组：63 题四轮全过，22 题通过三轮，14 题通过两轮，8 题通过一轮，
+7 题四轮均未通过。最终 7 条 `timeout` 轨迹已有官方 reward=0，属于有效业务失败；它们不是
+`infrastructure_error`，因此没有被续跑替换。456 条轨迹累计记录 9,674 次内部角色调用。
+
+### 运行中止与恢复
+
+| 版本 | 状态 | 暴露的问题与处理 |
+|---|---|---|
+| v1 | 早期中止 | 审查角色虚构不存在的工具名/参数，并把 DSML 标记或“已执行”声明当作正常回复；改为向审查角色提供官方工具 schema，并拒绝原始工具标记、虚假执行声明、未知工具和非法写批次。 |
+| v2 | 11 条后中止 | 把合法的多个只读调用整体拦截，导致协调员重复尝试并进入循环；改为只执行首个读调用，其余读调用延后到后续轮次，写工具仍保持单调用审批。中止前未发生实际写操作。 |
+| v3 | 0 条完成后中止 | provider 请求长时间不返回；启动器增加 `--model-request-timeout 120`，超时项进入可恢复的基础设施失败。 |
+| v4 | 正式完成 | 首跑留下 3 条基础设施失败；对同一 `save-to` 连续执行 3 次官方 `--auto-resume`，只补失败项，最终 456 条完整且基础设施失败为 0。 |
+
+上述恢复没有手工拼接轨迹，也没有修改 reward；每次续跑都复用相同任务、模型、seed、提示、
+并发和 checkpoint 身份。审查修复还确保成功的身份查询已经完成认证，不把不存在的邮箱读取
+误当作退换货前置条件。
+
+### 与单智能体基线比较
+
+| 官方指标 | `llm_agent` 单智能体 | `after_sales_multiagent` | 差值 |
+|---|---:|---:|---:|
+| Pass¹ | 92.3246% | 77.6316% | -14.69 个百分点 |
+| Pass² | 87.4269% | 66.9591% | -20.47 个百分点 |
+| Pass³ | 83.3333% | 60.0877% | -23.25 个百分点 |
+| Pass⁴ | 79.8246% | 55.2632% | -24.56 个百分点 |
+
+本次多智能体实现没有超过单智能体基线，而且随着要求连续通过的轮数增加，差距扩大。这个
+结果支持继续简化协作链路、减少审查后修复循环，而不支持“多智能体天然更好”的结论。
+
 ## 7 项能力冒烟
 
 运行身份：
@@ -102,34 +162,47 @@ handoff 解析失败，降级后仍完成任务。全部 78 条 Agent 输出都�
 
 - 所有内部角色当前使用同一个底层 DeepSeek 模型；这是多角色独立调用链，不是异构模型团队；
 - Agent 与用户模拟器使用同一模型，存在相关性偏差；
-- 7 题只做 1 trial，样本 100% 不能外推成完整 Retail 成绩；
-- LiteLLM 没有该模型的价格映射，`cost_complete=false`，只能报告 token 和时间，不能推算美元；
-- 单智能体基线使用官方原始 Agent 提示；自定义多智能体有自己的角色提示，因此比较的是两种
-  Agent 实现，不是同一提示的消融；
-- 只有完整 456 条结果满足 0 缺失、0 重复、0 未评分、0 基础设施错误后，才计算和比较
-  Pass¹–Pass⁴。
+- 7 题能力冒烟只做 1 trial，`7/7` 不能外推成正式 Retail 成绩；正式结论来自完整 456 条；
+- 正式结果文件记录的 Agent 侧 prompt/completion tokens 为
+  `68,203,319 / 3,407,738`，用户侧为 `3,878,262 / 732,714`；
+- 结果文件记录 Agent 成本值合计 `5.4640150824`、用户侧 `0.3215102128`，但文件没有声明
+  币种，因此这些值保持无单位，不把它们写成美元或真实账单；
+- 单智能体基线使用官方原始 Agent 提示；自定义多智能体使用自己的角色提示和额外内部调用，
+  因此比较的是两个本地端到端 Agent 实现，不是只改变“单/多智能体”一个变量的严格消融；
+- 本次使用官方任务、工具、数据库、Orchestrator 和评分代码，但 Agent、用户模拟器与自然语言
+  裁判均使用 DeepSeek。它是官方评测框架下的本地 Retail 单域比较，不是官方默认模型/裁判
+  榜单，也不是 τ2 全领域 Overall。
 
-## 已完成的零费用验证
+## 已完成的离线验证
 
-- 项目相关单测：21 passed；
+- 最终结果由 τ2 1.0.1 官方 `Results.load()` 成功读取；
+- 官方 `tau2 submit verify-trajs` 的格式、任务和 trial 数量检查全部通过；
+- 官方 `compute_metrics()` 输出 Pass¹–Pass⁴，与 354/456 奖励及任务通过次数分布一致；
+- 覆盖检查为 456 个唯一任务/轮次组合，0 缺失、0 意外、0 重复、0 未评分、0 基础设施错误；
+- 启动器请求超时转发、结果身份与完整性检查已有定向测试；
 - 自定义名称出现在官方 CLI Agent choices；
 - factory、state 和官方消息协议可实例化；
 - 假协调员、政策专员和审计员能完成 ToolCall 往返；
 - DeepSeek reasoning 回放、重复安装保护和 MultiToolMessage 转换兼容通过；
-- 写审批解析失败时 fail-closed；
+- 工具 schema 约束、虚假执行声明拦截、多读调用串行化和写审批 fail-closed 通过定向测试；
 - 结果身份不匹配时拒绝复制。
 
 ## 产物
 
+- `artifacts/day2/llm_baseline_results_multiagent_retail_base_4trials_v4.json`：正式 456 条轨迹；
+- `artifacts/day2/llm_baseline_launch_multiagent_retail_base_4trials_v4.json`：最终启动与验收记录；
+- `artifacts/day2/llm_baseline_launch_multiagent_retail_base_4trials_v4_dry_run.json`：正式命令预检记录；
+- `artifacts/day2/llm_baseline_summary_multiagent_retail_base_4trials_v4.json`：机器可读汇总；
+- `artifacts/day2/llm_baseline_summary_multiagent_retail_base_4trials_v4.md`：正式结果摘要；
 - `artifacts/day2/llm_baseline_results_multiagent_capability7_v1.json`：7 条官方轨迹；
 - `artifacts/day2/llm_baseline_launch_multiagent_capability7_v1.json`：启动与完整性检查；
 - `artifacts/day2/llm_baseline_results_multiagent_task66_pilot_v1.json`：超时诊断；
 - `artifacts/day2/llm_baseline_results_multiagent_task66_pilot_v2.json`：修复后的 task 66 轨迹；
 - `artifacts/day2/llm_baseline_launch_multiagent_task66_*.json`：对应启动记录。
 
-## 下一步正式评测
+## 复现命令
 
-将在全新 checkpoint 上运行完整 Retail `base` 114 题 × 4 trials：
+正式运行命令：
 
 ```powershell
 uv run python scripts\run_tau2_llm_baseline.py `
@@ -137,12 +210,12 @@ uv run python scripts\run_tau2_llm_baseline.py `
   --all-base-tasks `
   --num-trials 4 `
   --max-concurrency 3 `
-  --save-to after_sales_multiagent_retail_base_4trials_v1 `
-  --artifact-label multiagent_retail_base_4trials_v1 `
+  --model-request-timeout 120 `
+  --save-to after_sales_multiagent_retail_base_4trials_v4 `
+  --artifact-label multiagent_retail_base_4trials_v4 `
   --enforce-communication-protocol `
   --execute
 ```
 
-若出现可恢复基础设施错误，只使用完全相同的 `save-to` 和参数加 `--auto-resume`；不会手工
-拼接轨迹。完成后使用 τ2 官方 `compute_metrics` 计算 Pass¹–Pass⁴，再与单智能体
-`92.32% / 87.43% / 83.33% / 79.82%` 在相同任务与轮次下比较。
+若出现可恢复基础设施错误，只对完全相同的命令增加 `--auto-resume`，继续使用同一个
+`save-to`；不要改名或手工拼接结果。正式 v4 就是按这个方式完成补测。

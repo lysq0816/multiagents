@@ -28,6 +28,8 @@ from after_sales_agents.benchmark.tau2_multiagent_core import (
     AuditDecision,
     ConstraintLedger,
     PolicyReview,
+    contains_execution_claim,
+    contains_raw_tool_markup,
     is_review_approved,
     is_write_tool,
     parse_structured_handoff,
@@ -67,6 +69,15 @@ POLICY_SPECIALIST_INSTRUCTION = """
 You are the policy specialist. Review one proposed consequential tool call against the complete
 retail policy, the conversation, and the constraint ledger. Check authentication, order status,
 exact arguments, required payment details, confirmation, and whether the action was requested.
+The supplied available_tool_names and candidate_tool_schemas are authoritative. Never rename a
+tool, invent an argument, or require an argument absent from its schema. Only mandatory conditions
+stated in the supplied retail policy may block an action. A customer's supplementary question that
+does not change a candidate argument or policy requirement does not revoke an already explicit
+confirmation, and access to the account email is not a prerequisite for a return or exchange. Put
+only actual violations in violated_rules; put non-blocking concerns in risk_notes. Set
+candidate_allowed=true when all mandatory policy conditions are satisfied.
+A successful find_user_id_by_name_zip or find_user_id_by_email result completes authentication;
+never require a second email verification afterward.
 Return one JSON object using exactly these keys: candidate_allowed, confirmation_required,
 confirmation_present, missing_information, violated_rules, risk_notes, repair_instruction.
 The first three values must be booleans; the next three must be arrays of strings; and
@@ -78,6 +89,12 @@ AUDITOR_INSTRUCTION = """
 You are an independent auditor. Decide whether the exact proposed tool call may execute now.
 Reject extra writes, lost numeric or relational constraints, wrong order/item bindings, missing
 authentication, missing explicit confirmation, or any conflict with the policy specialist.
+Treat the supplied available_tool_names and candidate_tool_schemas as authoritative. Do not invent
+tool names, arguments, or prerequisites. Only explicit mandatory conditions in the supplied retail
+policy may block execution. A supplementary question that does not change a candidate argument or
+policy requirement does not revoke a completed confirmation, and email access is not a return or
+exchange prerequisite.
+A successful find_user_id_by_name_zip or find_user_id_by_email result completes authentication.
 Return one JSON object using exactly these keys: approved, issues, repair_instruction.
 approved must be a boolean, issues must be an array of strings, and repair_instruction must
 be a string, using an empty string rather than null.
@@ -152,7 +169,37 @@ class RoutedTau2MultiAgent(
             self._route_user_turn(message, state, llm_calls, turn_trace)
 
         candidate = self._coordinator_generate(state, llm_calls, turn_trace)
-        candidate = self._normalize_candidate(candidate)
+        candidate = self._normalize_candidate(candidate, turn_trace)
+
+        if contains_raw_tool_markup(candidate.content):
+            turn_trace.setdefault("invalid_coordinator_outputs", []).append("raw_tool_markup")
+            retry_output = self._coordinator_generate(
+                state,
+                llm_calls,
+                turn_trace,
+                audit_feedback=(
+                    "Your previous response rendered a tool call as text. If an action is ready, "
+                    "call exactly one supplied tool through the tool API. Otherwise ask one plain-"
+                    "language clarification question. Never claim the action ran and never output "
+                    "tool-call markup."
+                ),
+            )
+            invalid_retry_tool_shape = retry_output.tool_calls is not None and not (
+                self._is_registered_single_tool_call(retry_output)
+            )
+            retried = self._normalize_candidate(retry_output, turn_trace)
+            clean_tool = self._is_registered_single_tool_call(retried)
+            clean_text = (
+                not invalid_retry_tool_shape
+                and retried.has_text_content()
+                and not contains_raw_tool_markup(retried.content)
+                and not contains_execution_claim(retried.content)
+            )
+            if clean_tool or clean_text:
+                candidate = retried
+            else:
+                turn_trace["repair_outcome"] = "blocked_invalid_tool_markup"
+                candidate = self._blocked_write_response()
 
         if self._candidate_is_consequential(candidate):
             candidate = self._review_and_repair(
@@ -254,9 +301,15 @@ class RoutedTau2MultiAgent(
                 llm_calls,
                 turn_trace,
                 audit_feedback=feedback,
-            )
+            ),
+            turn_trace,
         )
         if not self._candidate_is_consequential(repaired):
+            if contains_raw_tool_markup(repaired.content) or contains_execution_claim(
+                repaired.content
+            ):
+                turn_trace["repair_outcome"] = "blocked_after_unsafe_non_tool_repair"
+                return self._blocked_write_response()
             turn_trace["repair_outcome"] = "non_consequential_response"
             return repaired
 
@@ -270,21 +323,12 @@ class RoutedTau2MultiAgent(
             turn_trace["repair_outcome"] = "approved_after_repair"
             return repaired
 
-        final_feedback = self._repair_instruction(second_policy, second_audit)
-        safe_response = self._normalize_candidate(
-            self._coordinator_generate(
-                state,
-                llm_calls,
-                turn_trace,
-                audit_feedback=(
-                    "Do not call any tool. Ask the customer for the missing confirmation or "
-                    f"information needed to resolve this audit: {final_feedback}"
-                ),
-                allow_tools=False,
-            )
+        turn_trace["final_audit_feedback"] = self._repair_instruction(
+            second_policy,
+            second_audit,
         )
         turn_trace["repair_outcome"] = "blocked_pending_user_clarification"
-        return safe_response
+        return self._blocked_write_response()
 
     def _audit_candidate(
         self,
@@ -293,11 +337,20 @@ class RoutedTau2MultiAgent(
         llm_calls: list[AssistantMessage],
         turn_trace: dict[str, Any],
     ) -> tuple[PolicyReview | None, AuditDecision]:
+        compact_candidate = self._compact_candidate(candidate)
+        turn_trace.setdefault("reviewed_candidates", []).append(compact_candidate)
         shared_payload = {
             "policy": self.domain_policy,
             "conversation": self._compact_transcript(state.messages),
             "constraint_ledger": (state.ledger.model_dump(mode="json") if state.ledger else None),
-            "candidate": self._compact_candidate(candidate),
+            "candidate": compact_candidate,
+            "available_tool_names": [tool.name for tool in self.tools],
+            "candidate_tool_schemas": [
+                tool.openai_schema
+                for tool in self.tools
+                if candidate.tool_calls
+                and any(tool.name == call.name for call in candidate.tool_calls)
+            ],
         }
         policy_review = self._structured_call(
             role="policy_specialist",
@@ -409,14 +462,47 @@ class RoutedTau2MultiAgent(
             ),
         }
 
-    @staticmethod
-    def _normalize_candidate(message: AssistantMessage) -> AssistantMessage:
-        if message.tool_calls:
+    def _normalize_candidate(
+        self,
+        message: AssistantMessage,
+        turn_trace: dict[str, Any] | None = None,
+    ) -> AssistantMessage:
+        if message.tool_calls is not None:
             message.content = None
-            message.tool_calls = message.tool_calls[:1]
+            calls = message.tool_calls
+            registered_names = {tool.name for tool in self.tools}
+            serializable_read_batch = (
+                len(calls) > 1
+                and all(call.name in registered_names for call in calls)
+                and all(
+                    not is_write_tool(call.name) and call.name != "transfer_to_human_agents"
+                    for call in calls
+                )
+            )
+            if serializable_read_batch:
+                if turn_trace is not None:
+                    turn_trace.setdefault("normalized_tool_batches", []).append(
+                        {
+                            "reason": "serialized_read_tool_batch",
+                            "returned_tool": calls[0].name,
+                            "deferred_tools": [call.name for call in calls[1:]],
+                        }
+                    )
+                message.tool_calls = calls[:1]
+            if not self._is_registered_single_tool_call(message):
+                if turn_trace is not None:
+                    turn_trace.setdefault("invalid_coordinator_outputs", []).append(
+                        "invalid_tool_call_shape"
+                    )
+                return self._blocked_write_response()
         if not message.has_text_content() and not message.is_tool_call():
             raise ValueError("Coordinator returned an empty response")
         return message
+
+    def _is_registered_single_tool_call(self, message: AssistantMessage) -> bool:
+        calls = message.tool_calls or []
+        registered_names = {tool.name for tool in self.tools}
+        return len(calls) == 1 and calls[0].name in registered_names
 
     @staticmethod
     def _candidate_is_consequential(message: AssistantMessage) -> bool:
@@ -442,6 +528,18 @@ class RoutedTau2MultiAgent(
         if not instructions:
             instructions.extend(audit.issues)
         return " ".join(instructions) or "Ask for explicit confirmation before the write."
+
+    @staticmethod
+    def _blocked_write_response() -> AssistantMessage:
+        return AssistantMessage(
+            role="assistant",
+            content=(
+                "I did not execute that requested database change, so that change was not made. "
+                "I still need to verify the exact action details and any required confirmation "
+                "before I can proceed. Please confirm the action you want me to take, including "
+                "the order and item details and the payment or refund method when applicable."
+            ),
+        )
 
     @staticmethod
     def _record_call(

@@ -45,6 +45,18 @@ _AFFIRMATIVE_PATTERN = re.compile(
     r"^\s*(yes|yep|yeah|correct|confirmed?|please (do|proceed)|go ahead|do it|that is right)\b",
     re.IGNORECASE,
 )
+_RAW_TOOL_MARKUP_PATTERN = re.compile(
+    r"(?:DSML.{0,80}tool_calls?|<\s*tool_calls?|<\s*function_calls?)",
+    re.IGNORECASE | re.DOTALL,
+)
+_EXECUTION_CLAIM_PATTERN = re.compile(
+    r"\b(?:i(?:'ve| have)|we(?:'ve| have))\s+(?:already\s+)?"
+    r"(?:submitted|processed|completed|cancelled|canceled|exchanged|returned|updated|modified)\b"
+    r"|\b(?:your|the)\s+(?:[a-z]+\s+){0,6}"
+    r"(?:has been|is now|was successfully)\s+"
+    r"(?:submitted|processed|completed|cancelled|canceled|exchanged|returned|updated|modified)\b",
+    re.IGNORECASE,
+)
 
 
 class ConstraintLedger(BaseModel):
@@ -165,6 +177,18 @@ def is_explicit_confirmation(user_text: str) -> bool:
 
 def is_write_tool(tool_name: str) -> bool:
     return tool_name in WRITE_TOOL_NAMES
+
+
+def contains_raw_tool_markup(content: str | None) -> bool:
+    """Detect provider tool syntax that was returned as user-visible text."""
+
+    return bool(content and _RAW_TOOL_MARKUP_PATTERN.search(content))
+
+
+def contains_execution_claim(content: str | None) -> bool:
+    """Detect a text claim that a database-changing action already happened."""
+
+    return bool(content and _EXECUTION_CLAIM_PATTERN.search(content))
 
 
 def is_review_approved(

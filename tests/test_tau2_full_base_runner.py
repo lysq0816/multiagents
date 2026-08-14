@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -113,6 +114,26 @@ def test_max_concurrency_is_forwarded_to_official_runner() -> None:
 
     index = command.index("--max-concurrency")
     assert command[index + 1] == "3"
+
+
+def test_model_request_timeout_is_forwarded_to_agent_and_user() -> None:
+    tau2_root = PROJECT_ROOT / ".external" / "tau2-bench-main"
+
+    command = MODULE.build_command(
+        tau2_root,
+        agent_model="deepseek/test",
+        user_model="deepseek/test",
+        save_to="timeout-test",
+        num_trials=1,
+        task_ids=["3"],
+        enforce_communication_protocol=True,
+        model_request_timeout=120,
+    )
+
+    agent_args = json.loads(command[command.index("--agent-llm-args") + 1])
+    user_args = json.loads(command[command.index("--user-llm-args") + 1])
+    assert agent_args == {"temperature": 0.0, "timeout": 120}
+    assert user_args == {"temperature": 0.0, "timeout": 120}
 
 
 def test_multi_agent_implementation_is_forwarded_to_official_runner() -> None:

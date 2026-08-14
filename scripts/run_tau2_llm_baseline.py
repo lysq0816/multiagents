@@ -50,8 +50,14 @@ def build_command(
     agent_implementation: str = OFFICIAL_AGENT_IMPLEMENTATION,
     auto_resume: bool = False,
     max_concurrency: int = 1,
+    model_request_timeout: float | None = None,
 ) -> list[str]:
     """Build a deterministic official CLI command for a subset or the full base split."""
+
+    llm_args: dict[str, float] = {"temperature": 0.0}
+    if model_request_timeout is not None:
+        llm_args["timeout"] = model_request_timeout
+    serialized_llm_args = json.dumps(llm_args)
 
     command = [
         str(_tau2_python(tau2_root)),
@@ -64,13 +70,13 @@ def build_command(
         "--agent-llm",
         agent_model,
         "--agent-llm-args",
-        '{"temperature": 0.0}',
+        serialized_llm_args,
         "--user",
         "user_simulator",
         "--user-llm",
         user_model,
         "--user-llm-args",
-        '{"temperature": 0.0}',
+        serialized_llm_args,
         "--task-split-name",
         "base",
         "--num-trials",
@@ -213,6 +219,14 @@ def main() -> int:
         default=1,
         help="Number of official tau2 simulations to run concurrently.",
     )
+    parser.add_argument(
+        "--model-request-timeout",
+        type=float,
+        help=(
+            "Optional LiteLLM timeout in seconds for each agent and user model request. "
+            "Use this to turn a stalled provider request into a recoverable run failure."
+        ),
+    )
     parser.add_argument("--task-ids", nargs="+")
     parser.add_argument(
         "--all-base-tasks",
@@ -259,6 +273,8 @@ def main() -> int:
         parser.error("--all-base-tasks cannot be combined with --task-ids")
     if args.max_concurrency < 1:
         parser.error("--max-concurrency must be at least 1")
+    if args.model_request_timeout is not None and args.model_request_timeout <= 0:
+        parser.error("--model-request-timeout must be greater than 0")
     tau2_root = locate_tau2_root(args.tau2_root)
     _, split_tasks = load_official_retail_data(tau2_root)
     base_task_ids = {str(task_id) for task_id in split_tasks.get("base", [])}
@@ -287,6 +303,7 @@ def main() -> int:
         agent_implementation=args.agent_implementation,
         auto_resume=args.auto_resume,
         max_concurrency=args.max_concurrency,
+        model_request_timeout=args.model_request_timeout,
     )
     configured_keys = load_model_credentials()
     record = {
@@ -313,6 +330,7 @@ def main() -> int:
         ),
         "num_trials": args.num_trials,
         "max_concurrency": args.max_concurrency,
+        "model_request_timeout": args.model_request_timeout,
         "enforce_communication_protocol": args.enforce_communication_protocol,
         "auto_resume": args.auto_resume,
         "deepseek_reasoning_content_replay": any(
